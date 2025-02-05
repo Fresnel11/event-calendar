@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import Calendar from './components/CalendarDays'
+import CalendarApp from './components/CalendarApp';
 
 function App() {
   return (
     <div className="App">
-      <Calendar />
+      <CalendarApp />
     </div>
   );
 }
