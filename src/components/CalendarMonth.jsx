@@ -18,10 +18,21 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth }) => {
 
     // Fonction pour ajouter un événement (tâche)
     const handleAddEvent = (date, task) => {
-        setEvents([...events, { date, task }]);
-        setNotification({ message: 'Événement ajouté avec succès!', type: 'success' });  // Affichage de la notification
-        setTimeout(() => setNotification(null), 3000);  // Masquer la notification après 3 secondes
+        const newEvent = { date, task };
+
+        // Mise à jour de l'état avec l'événement ajouté
+        setEvents([...events, newEvent]);
+
+        // Affichage de la notification
+        setNotification({ message: 'Événement ajouté avec succès!', type: 'success' });
+
+        // Affichage de la tâche dans la console
+        console.log('Nouvel événement ajouté :', newEvent);
+
+        // Masquer la notification après 4 secondes
+        setTimeout(() => setNotification(null), 4000);
     };
+
 
     const generateCalendarDays = () => {
         if (!currentMonth) return [];
@@ -67,6 +78,8 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth }) => {
     };
 
     const handleDayDoubleClick = (date) => {
+        console.log('Double-clic sur :', date);
+        
         setSelectedDate(date);
         setIsModalOpen(true); // Ouvre le modal au double-clic
     };
@@ -132,7 +145,7 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth }) => {
             </div>
 
             {/* SidebarEvent */}
-            {isSidebarOpen && <SidebarEvent selectedDate={selectedDate} onClose={() => { setSelectedDate(null); setIsSidebarOpen(false); }} events={events}  />}
+            {isSidebarOpen && <SidebarEvent selectedDate={selectedDate} onClose={() => { setSelectedDate(null); setIsSidebarOpen(false); }} events={events} />}
 
             {/* EventModal */}
             {isModalOpen && <EventModal isOpen={isModalOpen} selectedDate={selectedDate} onClose={closeModal} onAddEvent={handleAddEvent} />}

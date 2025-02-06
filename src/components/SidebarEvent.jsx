@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 
 const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEvent }) => {
     const [eventList, setEventList] = useState([]);
+    console.log(events);
+    
 
     useEffect(() => {
         if (selectedDate) {
@@ -32,22 +34,23 @@ const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEv
                 <button onClick={onClose} className="text-gray-600 cursor-pointer hover:text-gray-800">✖</button>
             </div>
 
-            {eventList.length === 0 ? (
+            {events.length === 0 ? (
                 <p className="text-gray-500">Aucun événement prévu ce jour.</p>
             ) : (
                 <div>
-                    {eventList.map((event) => (
-                        <div key={event.id} className="bg-white p-4 mb-2 border rounded-md shadow-sm">
-                            <p className="text-gray-800">{event.task}</p>
+                    {events.map((event, index) => (
+                        <div key={index} className="bg-white p-4 mb-2 border rounded-md shadow-sm">
+                            <p className="text-gray-800">{event.date.title}</p>
+                            <p>{event.date.description}</p>
                             <div className="flex justify-end mt-2 space-x-2">
                                 <button
-                                    onClick={() => handleUpdate(event.id, prompt("Modifier l'événement :", event.task))}
+                                    onClick={() => handleUpdate(event, prompt("Modifier l'événement :", event.date.title))}
                                     className="text-blue-500 hover:text-blue-700"
                                 >
                                     Modifier
                                 </button>
                                 <button
-                                    onClick={() => handleDelete(event.id)}
+                                    onClick={() => handleDelete(event)}
                                     className="text-red-500 hover:text-red-700"
                                 >
                                     Supprimer
