@@ -1,14 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import SidebarEvent from './SidebarEvent';
+import EventModal from './EventModal';
+import Notification from './Notification';
+
 
 const CalendarMonth = ({ currentMonth, setCurrentMonth }) => {
     const [selectedDate, setSelectedDate] = useState(null);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false); // État pour la sidebar
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [events, setEvents] = useState([]); // Pour stocker les événements (tâches)
+    const [notification, setNotification] = useState(null);  // État pour la notification
 
     useEffect(() => {
         const today = new Date();
         setSelectedDate(today);
     }, []);
+
+    // Fonction pour ajouter un événement (tâche)
+    const handleAddEvent = (date, task) => {
+        setEvents([...events, { date, task }]);
+        setNotification({ message: 'Événement ajouté avec succès!', type: 'success' });  // Affichage de la notification
+        setTimeout(() => setNotification(null), 3000);  // Masquer la notification après 3 secondes
+    };
 
     const generateCalendarDays = () => {
         if (!currentMonth) return [];
@@ -50,7 +63,16 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth }) => {
 
     const handleDayClick = (date) => {
         setSelectedDate(date);
-        setIsSidebarOpen(true); // Ouvre la sidebar lorsque tu cliques sur un jour
+        setIsSidebarOpen(true);
+    };
+
+    const handleDayDoubleClick = (date) => {
+        setSelectedDate(date);
+        setIsModalOpen(true); // Ouvre le modal au double-clic
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
     };
 
     const isToday = (date) => {
@@ -65,22 +87,17 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth }) => {
 
     return (
         <div className="flex h-screen">
+            {/* Notification */}
+            {notification && (
+                <Notification message={notification.message} type={notification.type} />
+            )}
+
             {/* Calendrier */}
             <div className={`transition-all duration-300 ${isSidebarOpen ? 'w-5/6' : 'w-full'} bg-white`}>
                 <div className="flex items-center justify-between p-4 border-b">
                     <div className="flex items-center space-x-2">
-                        <button 
-                            onClick={handlePrevMonth}
-                            className="p-1 hover:bg-gray-100 rounded-sm"
-                        >
-                            ◀
-                        </button>
-                        <button 
-                            onClick={handleNextMonth}
-                            className="p-1 hover:bg-gray-100 rounded-sm"
-                        >
-                            ▶
-                        </button>
+                        <button onClick={handlePrevMonth} className="p-1 hover:bg-gray-100 rounded-sm">◀</button>
+                        <button onClick={handleNextMonth} className="p-1 hover:bg-gray-100 rounded-sm">▶</button>
                         <h2 className="text-lg font-semibold text-gray-900">
                             {currentMonth.toLocaleString('fr-FR', { month: 'long', year: 'numeric' })}
                         </h2>
@@ -100,6 +117,7 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth }) => {
                                 ${selectedDate && selectedDate.toDateString() === day.date.toDateString() ? 'bg-blue-200' : ''} 
                                 ${!day.isCurrentMonth ? 'bg-gray-50' : 'bg-white'}`}
                             onClick={() => handleDayClick(day.date)}
+                            onDoubleClick={() => handleDayDoubleClick(day.date)}
                         >
                             <div
                                 className={`flex items-center justify-center w-7 h-7 text-sm rounded-full 
@@ -114,7 +132,10 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth }) => {
             </div>
 
             {/* SidebarEvent */}
-            {isSidebarOpen && <SidebarEvent selectedDate={selectedDate} onClose={() => { setSelectedDate(null); setIsSidebarOpen(false); }} />}
+            {isSidebarOpen && <SidebarEvent selectedDate={selectedDate} onClose={() => { setSelectedDate(null); setIsSidebarOpen(false); }} events={events}  />}
+
+            {/* EventModal */}
+            {isModalOpen && <EventModal isOpen={isModalOpen} selectedDate={selectedDate} onClose={closeModal} onAddEvent={handleAddEvent} />}
         </div>
     );
 };

@@ -1,6 +1,26 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
-const SidebarEvent = ({ selectedDate, onClose }) => {
+const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEvent }) => {
+    const [eventList, setEventList] = useState([]);
+
+    useEffect(() => {
+        if (selectedDate) {
+            // Filtrer les événements pour la date sélectionnée
+            const filteredEvents = events.filter(event =>
+                new Date(event.date).toDateString() === selectedDate.toDateString()
+            );
+            setEventList(filteredEvents);
+        }
+    }, [selectedDate, events]);
+
+    const handleDelete = (id) => {
+        onDeleteEvent(id);  // Appelle la fonction de suppression
+    };
+
+    const handleUpdate = (id, updatedTask) => {
+        onUpdateEvent(id, updatedTask);  // Appelle la fonction de mise à jour
+    };
+
     if (!selectedDate) return null;
 
     return (
@@ -12,7 +32,31 @@ const SidebarEvent = ({ selectedDate, onClose }) => {
                 <button onClick={onClose} className="text-gray-600 cursor-pointer hover:text-gray-800">✖</button>
             </div>
 
-            <p className="text-gray-500">Aucun événement prévu ce jour.</p>
+            {eventList.length === 0 ? (
+                <p className="text-gray-500">Aucun événement prévu ce jour.</p>
+            ) : (
+                <div>
+                    {eventList.map((event) => (
+                        <div key={event.id} className="bg-white p-4 mb-2 border rounded-md shadow-sm">
+                            <p className="text-gray-800">{event.task}</p>
+                            <div className="flex justify-end mt-2 space-x-2">
+                                <button
+                                    onClick={() => handleUpdate(event.id, prompt("Modifier l'événement :", event.task))}
+                                    className="text-blue-500 hover:text-blue-700"
+                                >
+                                    Modifier
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(event.id)}
+                                    className="text-red-500 hover:text-red-700"
+                                >
+                                    Supprimer
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };
