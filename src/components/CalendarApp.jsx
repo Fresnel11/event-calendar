@@ -1,5 +1,5 @@
 import { useCalendarApp, ScheduleXCalendar } from '@schedule-x/react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import '@schedule-x/theme-default/dist/index.css'
 import {
     createViewDay,
@@ -8,6 +8,9 @@ import {
     createViewWeek,
 } from '@schedule-x/calendar'
 import { createEventsServicePlugin } from '@schedule-x/events-service'
+import { createEventModalPlugin } from '@schedule-x/event-modal'
+import { createDragAndDropPlugin } from '@schedule-x/drag-and-drop'
+
 
 function CalendarApp() {
     const eventsService = useState(() => createEventsServicePlugin())[0]
@@ -20,16 +23,20 @@ function CalendarApp() {
             {
                 id: '1',
                 title: 'Event 1',
-                start: '2023-12-16',
-                end: '2023-12-16',
+                start: '2025-02-05',
+                end: '2025-02-05',
             },
         ],
-        plugins: [eventsService]
+        plugins: [
+            createEventModalPlugin(),
+            createDragAndDropPlugin(),
+            createEventModalPlugin(),
+            createEventsServicePlugin(),
+            createResi
+        ]
     })
 
-    useEffect(() => {
-        eventsService.getAll()
-    }, [])
+
 
     // Fonction pour afficher le mois et l'année actuels dans l'en-tête
     const monthYear = `${currentMonth.toLocaleString('default', { month: 'long' })} ${currentMonth.getFullYear()}`;
