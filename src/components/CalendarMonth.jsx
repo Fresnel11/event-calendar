@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import SidebarEvent from './SidebarEvent';
 import EventModal from './EventModal';
 import Notification from './Notification';
@@ -29,7 +30,7 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth }) => {
         // Affichage de la tâche dans la console
         console.log('Nouvel événement ajouté :', newEvent);
 
-        // Masquer la notification après 4 secondes
+        // Masquer la notification après 4 secondes^$
         setTimeout(() => setNotification(null), 4000);
     };
 
@@ -151,6 +152,10 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth }) => {
             {isModalOpen && <EventModal isOpen={isModalOpen} selectedDate={selectedDate} onClose={closeModal} onAddEvent={handleAddEvent} />}
         </div>
     );
+};
+CalendarMonth.propTypes = {
+    currentMonth: PropTypes.instanceOf(Date).isRequired,
+    setCurrentMonth: PropTypes.func.isRequired,
 };
 
 export default CalendarMonth;
