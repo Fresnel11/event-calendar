@@ -6,8 +6,13 @@ import { mdiTableLargePlus } from '@mdi/js';
 
 const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
     const [title, setTitle] = useState('');
-    const [startDate, setStartDate] = useState(selectedDate);
-    const [endDate, setEndDate] = useState(selectedDate);
+    const [startDate, setStartDate] = useState(
+        new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate())
+    );
+    const [endDate, setEndDate] = useState(
+        new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate())
+    );
+    
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
     const [allDay, setAllDay] = useState(false);
@@ -116,7 +121,7 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
                                             <input
                                                 type="date"
                                                 className="w-full px-3 py-2 bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                                value={startDate.toISOString().split('T')[0]}
+                                                value={startDate.toLocaleDateString('fr-CA')}
                                                 onChange={(e) => setStartDate(new Date(e.target.value))}
                                             />
                                         </div>
@@ -129,7 +134,7 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
                                             <input
                                                 type="date"
                                                 className="w-full px-3 py-2 bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                                value={endDate.toISOString().split('T')[0]}
+                                                value={endDate.toLocaleDateString('fr-CA')}
                                                 onChange={(e) => setEndDate(new Date(e.target.value))}
                                             />
                                         </div>
