@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import Icon from '@mdi/react';
+import { mdiArrowLeftDropCircle, mdiArrowRightDropCircle } from '@mdi/js';
 
-const CalendarWorkWeek = ({ currentMonth }) => {
+const CalendarWorkWeek = () => {
     const [currentWeekStart, setCurrentWeekStart] = useState(getStartOfWeek(new Date()));
     const [currentTime, setCurrentTime] = useState(new Date());
     const [tooltipTime, setTooltipTime] = useState(formatCurrentTime(new Date())); // État pour le tooltip
@@ -91,19 +93,15 @@ const CalendarWorkWeek = ({ currentMonth }) => {
                 <div className="flex items-center space-x-2">
                     <button
                         onClick={handlePrevWeek}
-                        className="p-1 hover:bg-gray-100 rounded"
+                        className="p-1 cursor-pointer rounded"
                     >
-                        <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
+                        <Icon path={mdiArrowLeftDropCircle} size={1} />
                     </button>
                     <button
                         onClick={handleNextWeek}
-                        className="p-1 hover:bg-gray-100 rounded"
+                        className="p-1 cursor-pointer rounded"
                     >
-                        <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
+                        <Icon path={mdiArrowRightDropCircle} size={1} />
                     </button>
                     <h2 className="text-lg font-semibold text-gray-900">
                         {`${workWeekDays[0].toLocaleDateString('fr-FR', { month: 'long', day: 'numeric' })} - ${workWeekDays[4].toLocaleDateString('fr-FR', { month: 'long', day: 'numeric', year: 'numeric' })}`}

@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import SidebarEvent from './SidebarEvent';
 import EventModal from './EventModal';
 import Notification from './Notification';
+import Icon from '@mdi/react';
+import { mdiArrowLeftDropCircle, mdiArrowRightDropCircle } from '@mdi/js';
 
 
 const CalendarMonth = ({ currentMonth, setCurrentMonth }) => {
@@ -18,21 +20,17 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth }) => {
     }, []);
 
     // Fonction pour ajouter un événement (tâche)
-    const handleAddEvent = (date, task) => {
-        const newEvent = { date, task };
-
-        // Mise à jour de l'état avec l'événement ajouté
-        setEvents([...events, newEvent]);
-
-        // Affichage de la notification
-        setNotification({ message: 'Événement ajouté avec succès!', type: 'success' });
-
-        // Affichage de la tâche dans la console
-        console.log('Nouvel événement ajouté :', newEvent);
-
-        // Masquer la notification après 4 secondes^$
-        setTimeout(() => setNotification(null), 4000);
+  const handleAddEvent = (eventData) => {
+    const newEvent = {
+        id: Date.now().toString(), // Identifiant unique
+        ...eventData
     };
+    setEvents(prev => [...prev, newEvent]);
+    console.log('Nouvel événement ajouté :', newEvent);
+    
+    setNotification({ message: 'Événement ajouté avec succès!', type: 'success' });
+    setTimeout(() => setNotification(null), 4000);
+};
 
 
     const generateCalendarDays = () => {
@@ -110,8 +108,8 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth }) => {
             <div className={`transition-all duration-300 ${isSidebarOpen ? 'w-5/6' : 'w-full'} bg-white`}>
                 <div className="flex items-center justify-between p-4 border-b">
                     <div className="flex items-center space-x-2">
-                        <button onClick={handlePrevMonth} className="p-1 hover:bg-gray-100 rounded-sm">◀</button>
-                        <button onClick={handleNextMonth} className="p-1 hover:bg-gray-100 rounded-sm">▶</button>
+                        <button onClick={handlePrevMonth} className="p-1 cursor-pointer rounded-sm"><Icon path={mdiArrowLeftDropCircle} size={1} /></button>
+                        <button onClick={handleNextMonth} className="p-1 cursor-pointer rounded-sm"><Icon path={mdiArrowRightDropCircle} size={1} /></button>
                         <h2 className="text-lg font-semibold text-gray-900">
                             {currentMonth.toLocaleString('fr-FR', { month: 'long', year: 'numeric' })}
                         </h2>
@@ -124,24 +122,44 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth }) => {
                             {day}
                         </div>
                     ))}
-                    {days.map((day, index) => (
-                        <div
-                            key={index}
-                            className={`relative h-24 p-1 border-b border-r cursor-pointer 
-                                ${selectedDate && selectedDate.toDateString() === day.date.toDateString() ? 'bg-blue-200' : ''} 
-                                ${!day.isCurrentMonth ? 'bg-gray-50' : 'bg-white'}`}
-                            onClick={() => handleDayClick(day.date)}
-                            onDoubleClick={() => handleDayDoubleClick(day.date)}
-                        >
-                            <div
-                                className={`flex items-center justify-center w-7 h-7 text-sm rounded-full 
-                                    ${isToday(day.date) ? 'bg-blue-600 text-white' : 'text-gray-900 hover:bg-gray-100'}
-                                    ${selectedDate && selectedDate.toDateString() === day.date.toDateString() ? 'bg-blue-400 text-white' : ''}`}
-                            >
-                                {day.day}
-                            </div>
-                        </div>
-                    ))}
+{days.map((day, index) => (
+    <div
+        key={index}
+        className={`relative h-24 p-1 border-b border-r cursor-pointer 
+            ${selectedDate && selectedDate.toDateString() === day.date.toDateString() ? 'bg-blue-200' : ''} 
+            ${!day.isCurrentMonth ? 'bg-gray-50' : 'bg-white'}`}
+        onClick={() => handleDayClick(day.date)}
+        onDoubleClick={() => handleDayDoubleClick(day.date)}
+    >
+        <div
+            className={`flex items-center justify-center w-7 h-7 text-sm rounded-full 
+                ${isToday(day.date) ? 'bg-blue-600 text-white' : 'text-gray-900 hover:bg-gray-100'}
+                ${selectedDate && selectedDate.toDateString() === day.date.toDateString() ? 'bg-blue-400 text-white' : ''}`}
+        >
+            {day.day}
+        </div>
+        
+        {/* Affichage des événements */}
+        <div className="mt-1 space-y-1 overflow-y-auto max-h-[calc(100%-2rem)]">
+            {events
+                .filter(event => new Date(event.startDate).toDateString() === day.date.toDateString())
+                .map((event, eventIndex) => (
+                    <div
+                        key={eventIndex}
+                        className="px-2 py-1 text-xs rounded-md bg-blue-100 text-blue-800 truncate hover:bg-blue-200 transition-colors"
+                        title={event.title}
+                    >
+                        {!event.allDay && event.startTime && (
+                            <span className="mr-1 font-medium">
+                                {event.startTime}
+                            </span>
+                        )}
+                        {event.title}
+                    </div>
+                ))}
+        </div>
+    </div>
+))}
                 </div>
             </div>
 

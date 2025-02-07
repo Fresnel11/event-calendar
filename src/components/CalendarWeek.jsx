@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-
-const CalendarWeek = ({ currentMonth }) => {
+import { useState, useEffect } from 'react';
+import Icon from '@mdi/react';
+import { mdiArrowLeftDropCircle, mdiArrowRightDropCircle } from '@mdi/js';
+const CalendarWeek = () => {
     // Fonction de formatage de l'heure actuelle
     const formatCurrentTime = (date) => {
         return date.toLocaleTimeString('fr-FR', {
@@ -91,19 +92,15 @@ const CalendarWeek = ({ currentMonth }) => {
                 <div className="flex items-center space-x-2">
                     <button
                         onClick={handlePrevWeek}
-                        className="p-1 hover:bg-gray-100 rounded"
+                        className="p-1 cursor-pointer rounded"
                     >
-                        <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
+                        <Icon path={mdiArrowLeftDropCircle} size={1} />
                     </button>
                     <button
                         onClick={handleNextWeek}
-                        className="p-1 hover:bg-gray-100 rounded"
+                        className="p-1 cursor-pointer rounded"
                     >
-                        <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
+                        <Icon path={mdiArrowRightDropCircle} size={1} />
                     </button>
                     <h2 className="text-lg font-semibold text-gray-900">
                         {`${weekDays[0].toLocaleDateString('fr-FR', { month: 'long', day: 'numeric' })} - ${weekDays[6].toLocaleDateString('fr-FR', { month: 'long', day: 'numeric', year: 'numeric' })}`}
@@ -188,6 +185,9 @@ const CalendarWeek = ({ currentMonth }) => {
             </div>
         </div>
     );
+};
+CalendarWeek.propTypes = {
+    // currentMonth: PropTypes.instanceOf(Date), // Uncomment if you plan to use currentMonth in the future
 };
 
 export default CalendarWeek;

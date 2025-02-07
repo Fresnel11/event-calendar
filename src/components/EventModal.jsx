@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
 import Icon from '@mdi/react';
 import { mdiTableLargePlus } from '@mdi/js';
@@ -254,6 +255,12 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
             )}
         </AnimatePresence>
     );
+};
+EventModal.propTypes = {
+    isOpen: PropTypes.bool.isRequired,
+    onClose: PropTypes.func.isRequired,
+    selectedDate: PropTypes.instanceOf(Date).isRequired,
+    onAddEvent: PropTypes.func.isRequired,
 };
 
 export default EventModal;

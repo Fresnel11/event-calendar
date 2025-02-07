@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-
+import { useState, useEffect } from 'react';
+import Icon from '@mdi/react';
+import { mdiArrowLeftDropCircle, mdiArrowRightDropCircle } from '@mdi/js';
 const CalendarDays = () => {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [currentTime, setCurrentTime] = useState(new Date());
@@ -53,10 +54,10 @@ const CalendarDays = () => {
             <div className="flex items-center justify-between px-4 py-2 border-b border-gray-300">
                 {/* Bouton précédent */}
                 <button
-                    className="text-gray-600 hover:text-black px-3 py-1 rounded"
+                    className="text-black cursor-pointer px-3 py-1 rounded"
                     onClick={() => changeDay(-1)}
                 >
-                    ◀
+                    <Icon path={mdiArrowLeftDropCircle} size={1} />
                 </button>
 
                 {/* Date sélectionnée */}
@@ -71,10 +72,10 @@ const CalendarDays = () => {
 
                 {/* Bouton suivant */}
                 <button
-                    className="text-gray-600 hover:text-black px-3 py-1 rounded"
+                    className="text-black cursor-pointer px-3 py-1 rounded"
                     onClick={() => changeDay(1)}
                 >
-                    ▶
+                    <Icon path={mdiArrowRightDropCircle} size={1} />
                 </button>
             </div>
 

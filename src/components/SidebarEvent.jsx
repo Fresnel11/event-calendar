@@ -25,7 +25,7 @@ const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEv
     if (!selectedDate) return null;
 
     return (
-        <div className="w-1/4 lg:w-1/5 h-screen bg-white border-l p-6 fixed right-0 top-0 shadow-xl overflow-y-auto">
+        <div className="w-1/4 lg:w-1/5 h-screen bg-white p-6 fixed right-0 top-0 shadow-xl overflow-y-auto">
             <div className="flex justify-between items-center border-b pb-4 mb-6">
                 <h2 className="text-xl font-semibold text-gray-800">
                     {selectedDate.toLocaleDateString('fr-FR', {
@@ -35,7 +35,7 @@ const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEv
                         year: 'numeric',
                     })}
                 </h2>
-                <button onClick={onClose} className="text-gray-600 hover:text-gray-900 transition-all duration-200">
+                <button onClick={onClose} className="text-red-600 cursor-pointer hover:text-gray-900 transition-all duration-200">
                     ✖
                 </button>
             </div>
