@@ -6,7 +6,6 @@ import Notification from './Notification';
 import Icon from '@mdi/react';
 import { mdiArrowLeftDropCircle, mdiArrowRightDropCircle } from '@mdi/js';
 
-
 const CalendarMonth = ({ currentMonth, setCurrentMonth }) => {
     const [selectedDate, setSelectedDate] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -14,24 +13,42 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth }) => {
     const [events, setEvents] = useState([]); // Pour stocker les événements (tâches)
     const [notification, setNotification] = useState(null);  // État pour la notification
 
+
     useEffect(() => {
         const today = new Date();
         setSelectedDate(today);
     }, []);
 
-    // Fonction pour ajouter un événement (tâche)
-  const handleAddEvent = (eventData) => {
-    const newEvent = {
-        id: Date.now().toString(), // Identifiant unique
-        ...eventData
-    };
-    setEvents(prev => [...prev, newEvent]);
-    console.log('Nouvel événement ajouté :', newEvent);
-    
-    setNotification({ message: 'Événement ajouté avec succès!', type: 'success' });
-    setTimeout(() => setNotification(null), 4000);
-};
+    // Ajouter un événement
+    const handleAddEvent = (eventData) => {
+        const newEvent = {
+            id: Date.now().toString(), // Identifiant unique
+            ...eventData
+        };
+        setEvents(prev => [...prev, newEvent]);
 
+        setNotification({ message: 'Événement ajouté avec succès!', type: 'success' });
+        setTimeout(() => setNotification(null), 4000);
+    };
+
+    const handleUpdateEvent = (updatedEvent) => {
+        setEvents((prevEvents) =>
+            prevEvents.map((event) =>
+                event.id === updatedEvent.id ? updatedEvent : event
+            )
+        );
+        setNotification({ message: 'Événement modifié avec succès!', type: 'success' });
+        setTimeout(() => setNotification(null), 4000);
+    };
+
+
+    // Supprimer un événement
+    const handleDeleteEvent = (eventId) => {
+        setEvents(prevEvents => prevEvents.filter(event => event.id !== eventId));
+
+        setNotification({ message: 'Événement supprimé avec succès!', type: 'error' });
+        setTimeout(() => setNotification(null), 4000);
+    };
 
     const generateCalendarDays = () => {
         if (!currentMonth) return [];
@@ -77,8 +94,6 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth }) => {
     };
 
     const handleDayDoubleClick = (date) => {
-        console.log('Double-clic sur :', date);
-        
         setSelectedDate(date);
         setIsModalOpen(true); // Ouvre le modal au double-clic
     };
@@ -122,55 +137,57 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth }) => {
                             {day}
                         </div>
                     ))}
-{days.map((day, index) => (
-    <div
-        key={index}
-        className={`relative h-24 p-1 border-b border-r cursor-pointer 
-            ${selectedDate && selectedDate.toDateString() === day.date.toDateString() ? 'bg-blue-200' : ''} 
-            ${!day.isCurrentMonth ? 'bg-gray-50' : 'bg-white'}`}
-        onClick={() => handleDayClick(day.date)}
-        onDoubleClick={() => handleDayDoubleClick(day.date)}
-    >
-        <div
-            className={`flex items-center justify-center w-7 h-7 text-sm rounded-full 
-                ${isToday(day.date) ? 'bg-blue-600 text-white' : 'text-gray-900 hover:bg-gray-100'}
-                ${selectedDate && selectedDate.toDateString() === day.date.toDateString() ? 'bg-blue-400 text-white' : ''}`}
-        >
-            {day.day}
-        </div>
-        
-        {/* Affichage des événements */}
-        <div className="mt-1 space-y-1 overflow-y-auto max-h-[calc(100%-2rem)]">
-            {events
-                .filter(event => new Date(event.startDate).toDateString() === day.date.toDateString())
-                .map((event, eventIndex) => (
-                    <div
-                        key={eventIndex}
-                        className="px-2 py-1 text-xs rounded-md bg-blue-100 text-blue-800 truncate hover:bg-blue-200 transition-colors"
-                        title={event.title}
-                    >
-                        {!event.allDay && event.startTime && (
-                            <span className="mr-1 font-medium">
-                                {event.startTime}
-                            </span>
-                        )}
-                        {event.title}
-                    </div>
-                ))}
-        </div>
-    </div>
-))}
+
+                    {days.map((day, index) => (
+                        <div
+                            key={index}
+                            className={`relative h-24 p-1 border-b border-r cursor-pointer 
+                                ${selectedDate && selectedDate.toDateString() === day.date.toDateString() ? 'bg-blue-200' : ''} 
+                                ${!day.isCurrentMonth ? 'bg-gray-50' : 'bg-white'}`}
+                            onClick={() => handleDayClick(day.date)}
+                            onDoubleClick={() => handleDayDoubleClick(day.date)}
+                        >
+                            <div
+                                className={`flex items-center justify-center w-7 h-7 text-sm rounded-full 
+                                    ${isToday(day.date) ? 'bg-blue-600 text-white' : 'text-gray-900 hover:bg-gray-100'}
+                                    ${selectedDate && selectedDate.toDateString() === day.date.toDateString() ? 'bg-blue-400 text-white' : ''}`}
+                            >
+                                {day.day}
+                            </div>
+
+                            {/* Affichage des événements */}
+                            <div className="mt-1 space-y-1 overflow-y-auto max-h-[calc(100%-2rem)]">
+                                {events
+                                    .filter(event => new Date(event.startDate).toDateString() === day.date.toDateString())
+                                    .map((event, eventIndex) => (
+                                        <div
+                                            key={event.id}
+                                            className="px-2 py-1 text-xs rounded-md bg-blue-100 text-blue-800 truncate hover:bg-blue-200 transition-colors"
+                                            title={event.title}
+                                        >
+                                            {!event.allDay && event.startTime && (
+                                                <span className="mr-1 font-medium">
+                                                    {event.startTime}
+                                                </span>
+                                            )}
+                                            {event.title}
+                                        </div>
+                                    ))}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
 
-            {/* SidebarEvent */}
-            {isSidebarOpen && <SidebarEvent selectedDate={selectedDate} onClose={() => { setSelectedDate(null); setIsSidebarOpen(false); }} events={events} />}
+            {/* SidebarEvent avec suppression */}
+            {isSidebarOpen && <SidebarEvent selectedDate={selectedDate} onClose={() => { setSelectedDate(null); setIsSidebarOpen(false); }} events={events} onDeleteEvent={handleDeleteEvent} onUpdateEvent={handleUpdateEvent} />}
 
             {/* EventModal */}
             {isModalOpen && <EventModal isOpen={isModalOpen} selectedDate={selectedDate} onClose={closeModal} onAddEvent={handleAddEvent} />}
         </div>
     );
 };
+
 CalendarMonth.propTypes = {
     currentMonth: PropTypes.instanceOf(Date).isRequired,
     setCurrentMonth: PropTypes.func.isRequired,

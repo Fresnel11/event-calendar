@@ -2,10 +2,17 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import purpleCalendar from '../assets/purplecalendar.png';
 import Icon from '@mdi/react';
-import { mdiClockOutline, mdiMapMarkerOutline, mdiRepeat, mdiDelete, mdiPencil } from '@mdi/js';
+import { mdiClockOutline, mdiRepeat, mdiDelete, mdiPencil } from '@mdi/js';
+import EditEventModal from './EditEventModal'; // Assure-toi d'importer ton modal
 
 const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEvent }) => {
     const [eventList, setEventList] = useState([]);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [eventToDelete, setEventToDelete] = useState(null);
+
+    // Nouvel état pour contrôler l'affichage du modal de modification
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [eventToEdit, setEventToEdit] = useState(null);
 
     useEffect(() => {
         if (selectedDate) {
@@ -26,7 +33,7 @@ const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEv
 
     const getEventDuration = (event) => {
         if (event.allDay) return 'Toute la journée';
-        
+
         const start = formatTime(event.startTime);
         const end = formatTime(event.endTime);
         return `${start} - ${end}`;
@@ -43,113 +50,147 @@ const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEv
         return recurrenceMap[recurrence] || 'Pas de répétition';
     };
 
+    const handleDeleteClick = (eventId) => {
+        setEventToDelete(eventId);
+        setShowDeleteModal(true);
+    };
+
+    const confirmDelete = () => {
+        if (eventToDelete) {
+            onDeleteEvent(eventToDelete);
+            setShowDeleteModal(false);
+            setEventToDelete(null);
+        }
+    };
+
+    const handleEditEvent = (updatedEvent) => {
+        onUpdateEvent(updatedEvent);
+        setShowEditModal(false);
+    };
+
+    // Fonction pour ouvrir le modal de modification
+    const handleEditClick = (event) => {
+        setEventToEdit(event);
+        setShowEditModal(true); // Ouvre le modal en définissant showEditModal à true
+        console.log('edit', event);
+        console.log(showEditModal)
+    };
+
     if (!selectedDate) return null;
 
     return (
-        <div className="w-1/4 lg:w-1/5 h-screen bg-white p-6 fixed right-0 top-0 shadow-xl overflow-y-auto">
-            {/* Header avec la date */}
-            <div className="flex justify-between items-center border-b pb-4 mb-6">
+        <div className="w-1/6 lg:w-1/5 h-screen bg-white p-4 fixed right-0 top-0 shadow-xl overflow-y-auto">
+            <div className="flex justify-between items-center border-b pb-3 mb-4">
                 <div>
-                    <h2 className="text-xl font-semibold text-gray-800">
+                    <h2 className="text-lg font-semibold text-gray-800">
                         {selectedDate.toLocaleDateString('fr-FR', {
                             weekday: 'long',
                             day: 'numeric',
                             month: 'long'
                         })}
                     </h2>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-xs text-gray-500">
                         {selectedDate.getFullYear()}
                     </p>
                 </div>
-                <button 
+                <button
                     onClick={onClose}
-                    className="text-gray-500 hover:text-gray-700 transition-colors"
+                    className="text-gray-500 cursor-pointer hover:text-gray-700 transition-colors text-sm"
                 >
                     ✖
                 </button>
             </div>
 
-            {/* Liste des événements */}
             {eventList.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)]">
-                    <img src={purpleCalendar} alt="Calendrier" className="w-32 h-32 mb-4 opacity-50" />
-                    <p className="text-gray-500 text-center">Aucun événement prévu ce jour.</p>
+                <div className="flex flex-col items-center justify-center h-[calc(100vh-160px)]">
+                    <img src={purpleCalendar} alt="Calendrier" className=" opacity-50" />
+                    <p className="text-gray-500 text-1xl font-bold text-center">Aucun événement prévu ce jour.</p>
+                    <p className='text-gray-500 text-xs text-center'>Passez une bonne journée !</p>
                 </div>
             ) : (
-                <div className="space-y-4">
+                <div className="space-y-3">
                     {eventList.map((event) => (
-                        <div 
-                            key={event.id} 
-                            className="bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-all duration-200 overflow-hidden"
+                        <div
+                            key={event.id}
+                            className="bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-all duration-200"
                         >
-                            {/* En-tête de l'événement */}
-                            <div className="p-4 border-l-4 border-blue-500">
-                                <div className="flex justify-between items-start mb-2">
-                                    <h3 className="text-lg font-semibold text-gray-800">
+                            <div className="p-3 border-l-4 rounded-lg border-blue-500">
+                                <div className="flex justify-between items-start mb-1.5">
+                                    <h3 className="text-sm font-semibold text-gray-800">
                                         {event.title}
                                     </h3>
-                                    <div className="flex space-x-2">
+                                    <div className="flex space-x-1">
                                         <button
-                                            onClick={() => {
-                                                const updatedTitle = prompt("Modifier l'événement :", event.title);
-                                                if (updatedTitle) onUpdateEvent(event.id, updatedTitle);
-                                            }}
-                                            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                                            onClick={() => handleEditClick(event)} // Ouvre le modal lors du clic
+                                            className="p-1 hover:bg-blue-200 cursor-pointer rounded-full transition-colors"
                                         >
-                                            <Icon path={mdiPencil} size={0.9} className="text-gray-600" />
+                                            <Icon path={mdiPencil} size={0.8} className="text-gray-600" />
                                         </button>
+
                                         <button
-                                            onClick={() => onDeleteEvent(event.id)}
-                                            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                                            onClick={() => handleDeleteClick(event.id)}
+                                            className="p-1 hover:bg-red-200 cursor-pointer rounded-full transition-colors"
                                         >
-                                            <Icon path={mdiDelete} size={0.9} className="text-gray-600" />
+                                            <Icon path={mdiDelete} size={0.8} className="text-gray-600" />
                                         </button>
                                     </div>
                                 </div>
 
-                                {/* Détails de l'événement */}
-                                <div className="space-y-2">
-                                    {/* Horaire */}
+                                <div className="space-y-1">
                                     <div className="flex items-center text-gray-600">
-                                        <Icon path={mdiClockOutline} size={0.9} className="mr-2" />
-                                        <span className="text-sm">
+                                        <Icon path={mdiClockOutline} size={0.8} className="mr-1.5" />
+                                        <span className="text-xs">
                                             {getEventDuration(event)}
                                         </span>
                                     </div>
 
-                                    {/* Lieu */}
-                                    {event.location && (
-                                        <div className="flex items-center text-gray-600">
-                                            <Icon path={mdiMapMarkerOutline} size={0.9} className="mr-2" />
-                                            <span className="text-sm">
-                                                {event.location}
-                                            </span>
-                                        </div>
-                                    )}
-
-                                    {/* Récurrence */}
                                     {event.recurrence !== 'none' && (
                                         <div className="flex items-center text-gray-600">
-                                            <Icon path={mdiRepeat} size={0.9} className="mr-2" />
-                                            <span className="text-sm">
+                                            <Icon path={mdiRepeat} size={0.8} className="mr-1.5" />
+                                            <span className="text-xs">
                                                 {getRecurrenceText(event.recurrence)}
                                             </span>
                                         </div>
                                     )}
                                 </div>
-
-                                {/* Description */}
-                                {event.description && (
-                                    <div className="mt-3 pt-3 border-t border-gray-100">
-                                        <p className="text-sm text-gray-600">
-                                            {event.description}
-                                        </p>
-                                    </div>
-                                )}
                             </div>
                         </div>
                     ))}
                 </div>
+            )}
+
+            {/* Modal de confirmation */}
+            {showDeleteModal && (
+                <div className="fixed inset-0 flex items-center justify-center backdrop-blur-xs bg-opacity-50">
+                    <div className="bg-white p-6 rounded-lg shadow-lg">
+                        <h2 className="text-lg font-semibold text-gray-800 mb-3">Confirmer la suppression</h2>
+                        <p className="text-sm text-gray-600 mb-4">Êtes-vous sûr de vouloir supprimer cet événement ?</p>
+                        <div className="flex justify-end space-x-2">
+                            <button
+                                onClick={() => setShowDeleteModal(false)}
+                                className="px-4 py-2 bg-none cursor-pointer text-gray-700 hover:text-gray-400 rounded-lg transition-colors"
+                            >
+                                Annuler
+                            </button>
+                            <button
+                                onClick={confirmDelete}
+                                className="px-4 py-2 bg-red-500 cursor-pointer text-white rounded-lg hover:bg-red-600 transition-colors"
+                            >
+                                Supprimer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Affichage du modal de modification si showEditModal est true */}
+            {showEditModal && eventToEdit && (
+                <EditEventModal
+                    isOpen={showEditModal}  
+                    onClose={() => setShowEditModal(false)}
+                    eventToEdit={eventToEdit} 
+                    onEditEvent={handleEditEvent}
+                />
             )}
         </div>
     );

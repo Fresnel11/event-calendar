@@ -4,20 +4,31 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Icon from '@mdi/react';
 import { mdiTableLargePlus } from '@mdi/js';
 
-const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
+const EditEventModal = ({ isOpen, onClose, eventToEdit, onEditEvent }) => {
     const [title, setTitle] = useState('');
-    const [startDate, setStartDate] = useState(
-        new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate())
-    );
-    const [endDate, setEndDate] = useState(
-        new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate())
-    );
+    const [startDate, setStartDate] = useState(new Date());
+    const [endDate, setEndDate] = useState(new Date());
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
     const [allDay, setAllDay] = useState(false);
     const [recurrence, setRecurrence] = useState('none');
     const [location, setLocation] = useState('');
     const [description, setDescription] = useState('');
+
+    // Mettre à jour les valeurs du formulaire quand l'événement est ouvert pour modification
+    useEffect(() => {
+        if (eventToEdit) {
+            setTitle(eventToEdit.title);
+            setStartDate(new Date(eventToEdit.startDate));
+            setEndDate(new Date(eventToEdit.endDate));
+            setStartTime(eventToEdit.startTime || '');
+            setEndTime(eventToEdit.endTime || '');
+            setAllDay(eventToEdit.allDay || false);
+            setRecurrence(eventToEdit.recurrence || 'none');
+            setLocation(eventToEdit.location || '');
+            setDescription(eventToEdit.description || '');
+        }
+    }, [eventToEdit]);
 
     // Fermer le modal avec la touche Escape
     useEffect(() => {
@@ -47,9 +58,10 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
         }
     };
 
-    const handleAddEvent = () => {
-        // Créer l'événement à ajouter
-        const event = {
+    const handleEditEvent = () => {
+        // Créer l'événement modifié
+        const updatedEvent = {
+            ...eventToEdit, // On garde les propriétés de l'événement original
             title,
             startDate,
             endDate,
@@ -60,9 +72,9 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
             location,
             description,
         };
-        // Appel de la fonction de callback pour ajouter l'événement
-        onAddEvent(event);
-        onClose(); // Ferme le modal après l'ajout
+        // Appel de la fonction de callback pour éditer l'événement
+        onEditEvent(updatedEvent);
+        onClose(); // Ferme le modal après l'édition
     };
 
     return (
@@ -86,7 +98,7 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
                         {/* Header */}
                         <div className="px-6 py-4 border-b bg-white flex items-center justify-between">
                             <h2 className="text-xl font-semibold text-gray-800">
-                                Ajouter un événement
+                                Modifier l'événement
                             </h2>
                             <Icon path={mdiTableLargePlus} size={1} />
                         </div>
@@ -140,7 +152,7 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
                                     </div>
                                 </div>
 
-                                {/* Heures */}
+                                {/* Heure de début et de fin */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -194,7 +206,6 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
                                     </label>
                                 </div>
 
-
                                 {/* Récurrence */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -245,6 +256,7 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
                                         ></textarea>
                                     </div>
                                 </div>
+
                             </div>
                         </div>
 
@@ -257,10 +269,10 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
                                 Annuler
                             </button>
                             <button
-                                onClick={handleAddEvent}
+                                onClick={handleEditEvent}
                                 className="px-4 py-2 text-sm font-medium cursor-pointer text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                             >
-                                Ajouter
+                                Enregistrer les modifications
                             </button>
                         </div>
                     </motion.div>
@@ -269,11 +281,12 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
         </AnimatePresence>
     );
 };
-EventModal.propTypes = {
+
+EditEventModal.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
-    selectedDate: PropTypes.instanceOf(Date).isRequired,
-    onAddEvent: PropTypes.func.isRequired,
+    eventToEdit: PropTypes.object,
+    onEditEvent: PropTypes.func.isRequired,
 };
 
-export default EventModal;
+export default EditEventModal;

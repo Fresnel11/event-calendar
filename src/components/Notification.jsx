@@ -1,88 +1,113 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CheckCircle, XCircle, Info, X } from 'lucide-react';
 
-const Notification = ({ message, type, onClose }) => {
-    const [visible, setVisible] = useState(true);
+const Notification = ({ message, type = 'info', onClose }) => {
+    const [isVisible, setIsVisible] = useState(true);
+    const [progress, setProgress] = useState(100);
 
-    // Fermer la notification après un certain temps (par exemple 4 secondes)
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setVisible(false);
+        const duration = 5000;
+        const interval = 10;
+        const step = (100 * interval) / duration;
+
+        const timer = setInterval(() => {
+            setProgress((prev) => {
+                if (prev <= 0) {
+                    clearInterval(timer);
+                    setIsVisible(false);
+                    return 0;
+                }
+                return prev - step;
+            });
+        }, interval);
+
+        return () => {
+            clearInterval(timer);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!isVisible && onClose) {
             onClose();
-        }, 5000); // 4 secondes
+        }
+    }, [isVisible, onClose]);
 
-        return () => clearTimeout(timer);
-    }, [onClose]);
-
-    const getNotificationStyles = () => {
+    const getIcon = () => {
         switch (type) {
             case 'success':
-                return 'bg-green-500 text-white';
+                return <CheckCircle className="w-6 h-6 text-green-500" />;
             case 'error':
-                return 'bg-red-500 text-white';
+                return <XCircle className="w-6 h-6 text-red-500" />;
             case 'info':
-                return 'bg-blue-500 text-white';
+                return <Info className="w-6 h-6 text-blue-500" />;
             default:
-                return 'bg-gray-800 text-white';
+                return null;
+        }
+    };
+
+    const getBorderColor = () => {
+        switch (type) {
+            case 'success':
+                return 'border-green-500';
+            case 'error':
+                return 'border-red-500';
+            case 'info':
+                return 'border-blue-500';
+            default:
+                return 'border-gray-500';
         }
     };
 
     return (
-        visible && (
-            <div
-                className={`fixed top-4 right-4 max-w-xs w-full p-4 rounded-lg shadow-lg ${getNotificationStyles()} transition-all transform duration-300 ease-in-out`}
-                style={{ zIndex: 9999 }}
-            >
-                <div className="flex items-center space-x-3">
-                    <div className="flex-shrink-0">
-                        {/* Icone en fonction du type */}
-                        {type === 'success' && (
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M5 13l4 4L19 7"
-                                />
-                            </svg>
-                        )}
-                        {type === 'error' && (
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M6 18L18 6M6 6l12 12"
-                                />
-                            </svg>
-                        )}
-                        {type === 'info' && (
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M12 8v4m0 4v4m0 0H8m4 0h4"
-                                />
-                            </svg>
-                        )}
-                    </div>
-                    <div className="flex-1">
-                        <p className="font-semibold">{type.charAt(0).toUpperCase() + type.slice(1)}</p>
-                        <p>{message}</p>
-                    </div>
-                    <button onClick={() => setVisible(false)} className="text-white ml-2">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M6 18L18 6M6 6l12 12"
+        <AnimatePresence>
+            {isVisible && (
+                <motion.div
+                    initial={{ opacity: 0, y: 50, x: 50 }}
+                    animate={{ opacity: 1, y: 0, x: 0 }}
+                    exit={{ opacity: 0, y: 50, x: 50 }}
+                    className="fixed bottom-4 right-4 z-50"
+                >
+                    <div className={`
+                        relative overflow-hidden
+                        max-w-sm w-full p-4 rounded-lg
+                        bg-white/10 backdrop-blur-lg
+                        border ${getBorderColor()}
+                        shadow-lg
+                        dark:bg-gray-800/90
+                    `}>
+                        <div className="flex items-center gap-3">
+                            {getIcon()}
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                                </p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                                    {message}
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setIsVisible(false)}
+                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {/* Barre de progression */}
+                        <div className="absolute bottom-0 left-0 h-1 bg-gray-200 dark:bg-gray-700 w-full">
+                            <div
+                                className={`h-full transition-all duration-75 ${
+                                    type === 'success' ? 'bg-green-500' :
+                                    type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+                                }`}
+                                style={{ width: `${progress}%` }}
                             />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        )
+                        </div>
+                    </div>
+                </motion.div>
+            )}
+        </AnimatePresence>
     );
 };
 
