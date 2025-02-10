@@ -5,8 +5,9 @@ import EventModal from './EventModal';
 import Notification from './Notification';
 import Icon from '@mdi/react';
 import { mdiArrowLeftDropCircle, mdiArrowRightDropCircle } from '@mdi/js';
+import { useEvents } from '../EventsContext';
 
-const CalendarMonth = ({ currentMonth, setCurrentMonth }) => {
+const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent }) => {
     const [selectedDate, setSelectedDate] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -17,6 +18,8 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth }) => {
     useEffect(() => {
         const today = new Date();
         setSelectedDate(today);
+        const storedEvents = JSON.parse(localStorage.getItem('events')) || [];
+        setEvents(storedEvents);
     }, []);
 
     // Ajouter un événement
@@ -25,11 +28,32 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth }) => {
             id: Date.now().toString(), // Identifiant unique
             ...eventData
         };
-        setEvents(prev => [...prev, newEvent]);
+
+        // Récupérer les événements du localStorage ou initialiser un tableau vide
+        let storedEvents = JSON.parse(localStorage.getItem('events'));
+
+        // Vérifier si storedEvents est bien un tableau, sinon initialiser un tableau vide
+        if (!Array.isArray(storedEvents)) {
+            storedEvents = [];
+        }
+
+        // Ajouter le nouvel événement au tableau
+        storedEvents.push(newEvent);
+
+        // Sauvegarder les événements mis à jour dans localStorage
+        localStorage.setItem('events', JSON.stringify(storedEvents));
+
+        // Mettre à jour l'état local (si tu utilises setEvents pour afficher les événements dans l'UI)
+        setEvents(storedEvents);
 
         setNotification({ message: 'Événement ajouté avec succès!', type: 'success' });
         setTimeout(() => setNotification(null), 4000);
+
+        // Émettre l'événement pour mettre à jour les autres composants si nécessaire
+        onAddEvent(newEvent);
     };
+
+
 
     const handleUpdateEvent = (updatedEvent) => {
         setEvents((prevEvents) =>

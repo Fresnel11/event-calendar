@@ -7,11 +7,16 @@ import { mdiTableLargePlus } from '@mdi/js';
 const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
     const [title, setTitle] = useState('');
     const [startDate, setStartDate] = useState(
-        new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate())
+        selectedDate && selectedDate instanceof Date && !isNaN(selectedDate)
+            ? new Date(Date.UTC(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), 0, 0))
+            : new Date() 
     );
     const [endDate, setEndDate] = useState(
-        new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate())
+        selectedDate && selectedDate instanceof Date && !isNaN(selectedDate)
+            ? new Date(Date.UTC(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), 0, 0))
+            : new Date() 
     );
+
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
     const [allDay, setAllDay] = useState(false);
