@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, XCircle, Info, X } from 'lucide-react';
 
-const Notification = ({ message, type = 'info', onClose }) => {
+const Notification = ({ message, type = 'info', onClose, id }) => {
     const [isVisible, setIsVisible] = useState(true);
     const [progress, setProgress] = useState(100);
 
@@ -29,9 +29,9 @@ const Notification = ({ message, type = 'info', onClose }) => {
 
     useEffect(() => {
         if (!isVisible && onClose) {
-            onClose();
+            onClose(id);
         }
-    }, [isVisible, onClose]);
+    }, [isVisible, onClose, id]);
 
     const getIcon = () => {
         switch (type) {
@@ -63,6 +63,7 @@ const Notification = ({ message, type = 'info', onClose }) => {
         <AnimatePresence>
             {isVisible && (
                 <motion.div
+                    key={id} // Ajout de la clé unique pour chaque notification
                     initial={{ opacity: 0, y: 50, x: 50 }}
                     animate={{ opacity: 1, y: 0, x: 0 }}
                     exit={{ opacity: 0, y: 50, x: 50 }}

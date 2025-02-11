@@ -5,51 +5,25 @@ import EventModal from './EventModal';
 import Notification from './Notification';
 import Icon from '@mdi/react';
 import { mdiArrowLeftDropCircle, mdiArrowRightDropCircle } from '@mdi/js';
-import { useEvents } from '../EventsContext';
 
-const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent }) => {
+const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent, events, setEvents, onDeleteEvent }) => {
     const [selectedDate, setSelectedDate] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [events, setEvents] = useState([]); // Pour stocker les événements (tâches)
-    const [notification, setNotification] = useState(null);  // État pour la notification
+    const [notification, setNotification] = useState(null);
 
 
     useEffect(() => {
         const today = new Date();
         setSelectedDate(today);
-        const storedEvents = JSON.parse(localStorage.getItem('events')) || [];
-        setEvents(storedEvents);
     }, []);
 
     // Ajouter un événement
     const handleAddEvent = (eventData) => {
         const newEvent = {
-            id: Date.now().toString(), // Identifiant unique
+            id: Date.now().toString(),
             ...eventData
         };
-
-        // Récupérer les événements du localStorage ou initialiser un tableau vide
-        let storedEvents = JSON.parse(localStorage.getItem('events'));
-
-        // Vérifier si storedEvents est bien un tableau, sinon initialiser un tableau vide
-        if (!Array.isArray(storedEvents)) {
-            storedEvents = [];
-        }
-
-        // Ajouter le nouvel événement au tableau
-        storedEvents.push(newEvent);
-
-        // Sauvegarder les événements mis à jour dans localStorage
-        localStorage.setItem('events', JSON.stringify(storedEvents));
-
-        // Mettre à jour l'état local (si tu utilises setEvents pour afficher les événements dans l'UI)
-        setEvents(storedEvents);
-
-        setNotification({ message: 'Événement ajouté avec succès!', type: 'success' });
-        setTimeout(() => setNotification(null), 4000);
-
-        // Émettre l'événement pour mettre à jour les autres composants si nécessaire
         onAddEvent(newEvent);
     };
 
@@ -66,13 +40,17 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent }) => {
     };
 
 
+
     // Supprimer un événement
     const handleDeleteEvent = (eventId) => {
         setEvents(prevEvents => prevEvents.filter(event => event.id !== eventId));
 
         setNotification({ message: 'Événement supprimé avec succès!', type: 'error' });
         setTimeout(() => setNotification(null), 4000);
+
+        onDeleteEvent(eventId);
     };
+
 
     const generateCalendarDays = () => {
         if (!currentMonth) return [];
@@ -119,7 +97,7 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent }) => {
 
     const handleDayDoubleClick = (date) => {
         setSelectedDate(date);
-        setIsModalOpen(true); // Ouvre le modal au double-clic
+        setIsModalOpen(true); 
     };
 
     const closeModal = () => {
@@ -185,7 +163,7 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent }) => {
                                     .filter(event => new Date(event.startDate).toDateString() === day.date.toDateString())
                                     .map((event, eventIndex) => (
                                         <div
-                                            key={event.id}
+                                            key={event.id || eventIndex}
                                             className="px-2 py-1 text-xs rounded-md bg-blue-100 text-blue-800 truncate hover:bg-blue-200 transition-colors"
                                             title={event.title}
                                         >
@@ -215,6 +193,8 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent }) => {
 CalendarMonth.propTypes = {
     currentMonth: PropTypes.instanceOf(Date).isRequired,
     setCurrentMonth: PropTypes.func.isRequired,
+    events: PropTypes.array.isRequired,
+    setEvents: PropTypes.func.isRequired,
 };
 
 export default CalendarMonth;

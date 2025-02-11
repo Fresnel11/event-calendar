@@ -59,23 +59,22 @@ const EditEventModal = ({ isOpen, onClose, eventToEdit, onEditEvent }) => {
     };
 
     const handleEditEvent = () => {
-        // Créer l'événement modifié
         const updatedEvent = {
             ...eventToEdit, // On garde les propriétés de l'événement original
-            title,
-            startDate,
-            endDate,
-            startTime,
-            endTime,
+            title: title || undefined, // Utiliser undefined si vide
+            startDate: startDate || undefined,
+            endDate: endDate || undefined,
+            startTime: startTime || undefined,
+            endTime: endTime || undefined,
             allDay,
-            recurrence,
-            location,
-            description,
+            recurrence: recurrence || 'none', // La récurrence est une valeur par défaut
+            location: location || undefined,
+            description: description || undefined,
         };
-        // Appel de la fonction de callback pour éditer l'événement
         onEditEvent(updatedEvent);
-        onClose(); // Ferme le modal après l'édition
+        onClose();
     };
+
 
     return (
         <AnimatePresence>

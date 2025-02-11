@@ -3,18 +3,19 @@ import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
 import Icon from '@mdi/react';
 import { mdiTableLargePlus } from '@mdi/js';
+import Notification from './Notification';
 
 const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
     const [title, setTitle] = useState('');
     const [startDate, setStartDate] = useState(
         selectedDate && selectedDate instanceof Date && !isNaN(selectedDate)
             ? new Date(Date.UTC(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), 0, 0))
-            : new Date() 
+            : new Date()
     );
     const [endDate, setEndDate] = useState(
         selectedDate && selectedDate instanceof Date && !isNaN(selectedDate)
             ? new Date(Date.UTC(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), 0, 0))
-            : new Date() 
+            : new Date()
     );
 
     const [startTime, setStartTime] = useState('');
@@ -23,6 +24,7 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
     const [recurrence, setRecurrence] = useState('none');
     const [location, setLocation] = useState('');
     const [description, setDescription] = useState('');
+    const [notification, setNotification] = useState(null);
 
     // Fermer le modal avec la touche Escape
     useEffect(() => {
@@ -53,7 +55,12 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
     };
 
     const handleAddEvent = () => {
-        // Créer l'événement à ajouter
+        if (!allDay && (!startTime || !endTime)) {
+            setNotification({ message: "Veuillez définir l'heure de début et de fin pour l'événement.", type: 'error' });
+            setTimeout(() => setNotification(null), 4000);
+            return;
+        }
+
         const event = {
             title,
             startDate,
@@ -65,13 +72,20 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
             location,
             description,
         };
-        // Appel de la fonction de callback pour ajouter l'événement
+
         onAddEvent(event);
-        onClose(); // Ferme le modal après l'ajout
+        onClose(); 
     };
+
 
     return (
         <AnimatePresence>
+            {/* Notification */}
+            {notification && (
+                <div className="fixed bottom-4 right-4 z-99">
+                    <Notification  key={notification.message} message={notification.message} type={notification.type} />
+                </div>
+            )}
             {isOpen && (
                 <motion.div
                     initial={{ opacity: 0 }}

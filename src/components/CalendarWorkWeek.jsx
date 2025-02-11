@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Icon from '@mdi/react';
 import { mdiArrowLeftDropCircle, mdiArrowRightDropCircle } from '@mdi/js';
 
-const CalendarWorkWeek = () => {
+const CalendarWorkWeek = ({ events }) => {
     const [currentWeekStart, setCurrentWeekStart] = useState(getStartOfWeek(new Date()));
     const [currentTime, setCurrentTime] = useState(new Date());
     const [tooltipTime, setTooltipTime] = useState(formatCurrentTime(new Date())); // État pour le tooltip
@@ -16,6 +16,9 @@ const CalendarWorkWeek = () => {
 
         return () => clearInterval(interval);
     }, []);
+    useEffect(() => {
+        console.log('Événements reçus dans CalendarWorkWeek:', events);
+    }, [events]);
 
     // Déplacer la fonction formatCurrentTime avant son utilisation
     function formatCurrentTime(date) {
@@ -81,6 +84,54 @@ const CalendarWorkWeek = () => {
         return currentHour + fractionOfHour;
     };
 
+    // Fonction de normalisation de la date
+    const normalizeDate = (date) => {
+        const d = new Date(date);
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    };
+
+    // Filtrage des événements pour la semaine en cours
+    const filteredEvents = events.filter(event => {
+        const eventDate = normalizeDate(event.startDate);
+        const startOfWeek = normalizeDate(workWeekDays[0]);
+        const endOfWeek = normalizeDate(workWeekDays[workWeekDays.length - 1]);
+
+        console.log(`Vérification de l'événement : ${event.title} - Date : ${eventDate}, Semaine : ${startOfWeek} -> ${endOfWeek}`);
+
+        return eventDate >= startOfWeek && eventDate <= endOfWeek;
+    });
+
+    const calculateEventStyle = (event) => {
+        const startTime = new Date(event.startDate);
+        const endTime = new Date(event.endDate);
+
+        if (event.allDay) {
+            return {
+                top: '0%',
+                height: '100%',
+            };
+        }
+
+        let startHour = startTime.getHours() + startTime.getMinutes() / 60;
+        let endHour = endTime.getHours() + endTime.getMinutes() / 60;
+
+        if (event.startTime) {
+            const [startHourPart, startMinutePart] = event.startTime.split(':');
+            startHour = parseInt(startHourPart) + parseInt(startMinutePart) / 60;
+        }
+        if (event.endTime) {
+            const [endHourPart, endMinutePart] = event.endTime.split(':');
+            endHour = parseInt(endHourPart) + parseInt(endMinutePart) / 60;
+        }
+
+        const duration = endHour - startHour;
+
+        return {
+            top: `${(startHour / 24) * 100}%`,
+            height: `${(duration / 24) * 100}%`,
+        };
+    };
+
     // Calcul de l'index du jour actuel
     const getTodayIndex = () => {
         return workWeekDays.findIndex(date => date.toDateString() === today.toDateString());
@@ -140,16 +191,10 @@ const CalendarWorkWeek = () => {
                     ))}
                 </div>
                 <div className="flex flex-1 relative">
-                    {workWeekDays.map((date, dayIndex) => (
-                        <div
-                            key={dayIndex}
-                            className="flex-1 border-l relative"
-                        >
+                    {workWeekDays.map((currentDay, dayIndex) => (
+                        <div key={currentDay || dayIndex} className="flex-1 border-l relative">
                             {hours.map((hour, hourIndex) => (
-                                <div
-                                    key={hourIndex}
-                                    className="h-12 border-b border-gray-200 relative"
-                                >
+                                <div key={hourIndex} className="h-12 border-b border-gray-200 relative">
                                     {/* Ligne horaire */}
                                     <div className="absolute inset-0 border-t border-gray-200 border-dashed" />
                                     {/* Trait bleu */}
@@ -162,6 +207,7 @@ const CalendarWorkWeek = () => {
                                                 right: '0',
                                                 height: '4px',
                                                 backgroundColor: 'blue',
+                                                zIndex: 10, 
                                             }}
                                             title={`Heure actuelle: ${tooltipTime}`} // Utiliser l'état du tooltip
                                         >
@@ -180,8 +226,47 @@ const CalendarWorkWeek = () => {
                                     )}
                                 </div>
                             ))}
+
+                            {filteredEvents
+                                .filter(event => {
+                                    const eventDate = normalizeDate(event.startDate);
+                                    const currentDayNormalized = normalizeDate(currentDay); // Normalisation de la date du jour courant
+                                    return eventDate.toISOString().split('T')[0] === currentDayNormalized.toISOString().split('T')[0]; // Filtrage par date
+                                })
+                                .map((event, index) => {
+                                    const style = calculateEventStyle(event);
+                                    return (
+                                        <div
+                                            key={index}
+                                            className="absolute left-1 rounded-sm right-1 bg-blue-100 border-l-4 border-blue-500 rounded-r-md shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+                                            style={style}
+                                        >
+                                            <div className="p-2">
+                                                <div className="text-sm font-medium text-gray-800 truncate">
+                                                    {event.title}
+                                                </div>
+                                                <div className="text-xs text-gray-600">
+                                                    {event.startTime
+                                                        ? event.startTime
+                                                        : new Date(event.startDate).toLocaleTimeString('fr-FR', {
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                        })}
+                                                    {' - '}
+                                                    {event.endTime
+                                                        ? event.endTime
+                                                        : new Date(event.endDate).toLocaleTimeString('fr-FR', {
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                        })}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                         </div>
                     ))}
+
                 </div>
             </div>
         </div>

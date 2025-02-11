@@ -109,9 +109,9 @@ const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEv
                 </div>
             ) : (
                 <div className="space-y-3">
-                    {eventList.map((event) => (
+                    {eventList.map((event, index) => (
                         <div
-                            key={event.id}
+                            key={event.id || index}
                             className="bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-all duration-200"
                         >
                             <div className="p-3 border-l-4 rounded-lg border-blue-500">
