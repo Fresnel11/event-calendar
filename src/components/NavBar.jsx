@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const NavBar = ({ setView }) => {
+const NavBar = ({ setView, goToToday }) => {
     const [selectedView, setSelectedView] = useState('days'); // Valeur par défaut, si aucune vue n'est sélectionnée.
 
     useEffect(() => {
@@ -24,7 +24,7 @@ const NavBar = ({ setView }) => {
             <button
                 onClick={() => handleSetView('days')}
                 className={`px-6 py-3 cursor-pointer rounded-lg font-semibold text-sm 
-                    ${selectedView === 'days' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-200'}
+                    ${selectedView === 'days' ? 'bg-[#238781] text-white' : 'text-gray-600 hover:bg-gray-200'}
                     transition-all duration-300 ease-in-out focus:outline-none`}
             >
                 Jour
@@ -32,7 +32,7 @@ const NavBar = ({ setView }) => {
             <button
                 onClick={() => handleSetView('month')}
                 className={`px-6 py-3 cursor-pointer rounded-lg font-semibold text-sm 
-                    ${selectedView === 'month' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-200'}
+                    ${selectedView === 'month' ? 'bg-[#238781] text-white' : 'text-gray-600 hover:bg-gray-200'}
                     transition-all duration-300 ease-in-out focus:outline-none`}
             >
                 Mois
@@ -40,7 +40,7 @@ const NavBar = ({ setView }) => {
             <button
                 onClick={() => handleSetView('week')}
                 className={`px-6 py-3 cursor-pointer rounded-lg font-semibold text-sm 
-                    ${selectedView === 'week' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-200'}
+                    ${selectedView === 'week' ? 'bg-[#238781] text-white' : 'text-gray-600 hover:bg-gray-200'}
                     transition-all duration-300 ease-in-out focus:outline-none`}
             >
                 Semaine
@@ -48,11 +48,12 @@ const NavBar = ({ setView }) => {
             <button
                 onClick={() => handleSetView('work-week')}
                 className={`px-6 py-3 cursor-pointer rounded-lg font-semibold text-sm 
-                    ${selectedView === 'work-week' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-200'}
+                    ${selectedView === 'work-week' ? 'bg-[#238781] text-white' : 'text-gray-600 hover:bg-gray-200'}
                     transition-all duration-300 ease-in-out focus:outline-none`}
             >
                 Semaine de travail
             </button>
+            
         </div>
     );
 };

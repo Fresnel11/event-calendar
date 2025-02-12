@@ -4,6 +4,7 @@ import { mdiArrowLeftDropCircle, mdiArrowRightDropCircle } from '@mdi/js';
 import EventModal from './EventModal';
 import EditEventModal from './EditEventModal';
 import Notification from './Notification';
+import { useEventStore } from '../context/EventStore';
 const CalendarDays = ({ events, onAddEvent, onEditEvent, onDeleteEvent, setEvents }) => {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [currentTime, setCurrentTime] = useState(new Date());
@@ -15,6 +16,8 @@ const CalendarDays = ({ events, onAddEvent, onEditEvent, onDeleteEvent, setEvent
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [notification, setNotification] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [editedEvent, setEditedEvent] = useState(null);
+    const { updateEvent } = useEventStore();
 
     function formatCurrentTime(date) {
         return date.toLocaleTimeString('fr-FR', {
@@ -91,10 +94,7 @@ const CalendarDays = ({ events, onAddEvent, onEditEvent, onDeleteEvent, setEvent
         return formatDate(eventDate) === selectedDay;
     });
 
-    useEffect(() => {
-        console.log('Événements pour aujourd\'hui:', eventsForDay);
-        console.log('les événements', events);
-    }, [eventsForDay]);
+
 
     const hours = generateHours();
     const isToday = selectedDate.toDateString() === new Date().toDateString();
@@ -138,7 +138,7 @@ const CalendarDays = ({ events, onAddEvent, onEditEvent, onDeleteEvent, setEvent
 
 
     const handleAddEvent = (newEvent) => {
-        setEvents((prevEvents) => [...prevEvents, newEvent]);
+        onAddEvent(newEvent);
         setNotification({ message: 'Événement ajouté avec succès!', type: 'success' });
         setTimeout(() => setNotification(null), 4000);
     };
@@ -150,17 +150,25 @@ const CalendarDays = ({ events, onAddEvent, onEditEvent, onDeleteEvent, setEvent
 
     const handleEditEvent = (updatedEvent) => {
         console.log("Événement modifié", updatedEvent);
-        setSelectedEvent(updatedEvent);
-        setContextMenu(null);
 
-        setEvents((prevEvents) =>
-            prevEvents.map((event) =>
-                event.id === updatedEvent.id ? updatedEvent : event
-            )
-        );
+        // Mettre à jour l'événement dans le store
+        updateEvent(updatedEvent._id, updatedEvent);
+
+        // Mettre à jour l'événement localement dans l'état du composant
+        // setEvents((prevEvents) =>
+        //     prevEvents.map((event) =>
+        //         event.id === updatedEvent.id ? updatedEvent : event
+        //     )
+        // );
+
+        setSelectedEvent(null); 
+        setContextMenu(null); 
+
+        // Notification
         setNotification({ message: 'Événement modifié avec succès!', type: 'success' });
         setTimeout(() => setNotification(null), 4000);
     };
+
 
 
     const handleOpenModal = () => {
@@ -175,7 +183,7 @@ const CalendarDays = ({ events, onAddEvent, onEditEvent, onDeleteEvent, setEvent
         }
 
         if (typeof onDeleteEvent === 'function') {
-            onDeleteEvent(selectedEvent.id);
+            onDeleteEvent(selectedEvent._id);
             setContextMenu(null);
             setNotification({ message: 'Événement supprimé avec succès!', type: 'error' });
             setTimeout(() => setNotification(null), 4000);
@@ -261,7 +269,7 @@ const CalendarDays = ({ events, onAddEvent, onEditEvent, onDeleteEvent, setEvent
                             return (
                                 <div
                                     key={index}
-                                    className="absolute left-1 rounded-sm right-1 bg-blue-100 border-l-4 border-blue-500 rounded-r-md shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+                                    className="absolute left-1 rounded-sm right-1 bg-[#E8F3F2] border-l-4 border-[#238781] rounded-r-md shadow-sm hover:shadow-md transition-shadow overflow-hidden"
                                     style={style}
                                     onContextMenu={(e) => handleRightClick(e, event)}
                                 >
@@ -297,6 +305,7 @@ const CalendarDays = ({ events, onAddEvent, onEditEvent, onDeleteEvent, setEvent
                         onClose={() => setShowModal(false)}
                         onAddEvent={handleAddEvent}
                         onEditEvent={onEditEvent}
+                        selectedDate={selectedDate}
                         selectedTime={modalTime}
                         eventToEdit={selectedEvent}
                     />

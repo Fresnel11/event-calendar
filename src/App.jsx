@@ -4,35 +4,23 @@ import CalendarWeek from './components/CalendarWeek';
 import CalendarWorkWeek from './components/CalendarWorkWeek';
 import CalendarDays from './components/CalendarDays';
 import NavBar from './components/NavBar';
+import { useEventStore } from './context/EventStore'; // Import du store
 
 function App() {
     const [view, setView] = useState('month'); // 'month', 'week', 'workweek', 'day'
-    const [currentMonth, setCurrentMonth] = useState(new Date());
-    const [currentWeek, setCurrentWeek] = useState(getCurrentWeek()); // Ajouter currentWeek
-    const [events, setEvents] = useState([]);
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [currentMonth, setCurrentMonth] = useState(new Date()); // Stocke la date actuelle
 
-    // Charger les événements depuis le localStorage au démarrage
+    // Accès à l'état global du store
+    const { state, fetchEvents, addEvent, deleteEvent, updateEvent } = useEventStore();
+    const { events, loading, error } = state;
+
+    // Charger les événements au démarrage
     useEffect(() => {
-        const storedEvents = JSON.parse(localStorage.getItem('events')) || [];
-        setEvents(storedEvents);
-        console.log('Événements chargés depuis le localStorage:', storedEvents);
-    }, []);
-
-    // Fonction pour ajouter un événement
-    const addEvent = (newEvent) => {
-        // Ajouter l'événement au tableau existant
-        const updatedEvents = [...events, newEvent];
-        setEvents(updatedEvents);
-
-        // Sauvegarder les événements mis à jour dans le localStorage
-        localStorage.setItem('events', JSON.stringify(updatedEvents));
-    };
-
-    const handleDeleteEvent = (eventId) => {
-        const updatedEvents = events.filter(event => event.id !== eventId);
-        setEvents(updatedEvents);
-        localStorage.setItem('events', JSON.stringify(updatedEvents));
-    };
+        if (events.length === 0) {
+            fetchEvents(); // Appel pour charger les événements depuis l'API
+        }
+    }, [events.length, fetchEvents]);
 
     // Fonction pour générer la semaine actuelle
     function getCurrentWeek() {
@@ -47,37 +35,49 @@ function App() {
         return week;
     }
 
+    // Fonction pour revenir au jour actuel
+    function goToToday() {
+        setCurrentDate(new Date()); // Mettre à jour la date actuelle
+        setView('day'); // Si tu veux revenir directement en vue "jour"
+    }
+
+    // Affichage des événements selon la vue
     return (
         <div className="App">
-            <NavBar setView={setView} />
+            <NavBar setView={setView} goToToday={goToToday} /> {/* Passe goToToday à NavBar */}
+            {loading && <p>Chargement des événements...</p>}
+            {error && <p style={{ color: 'red' }}>{error}</p>}
             {view === 'month' ? (
                 <CalendarMonth
                     currentMonth={currentMonth}
                     setCurrentMonth={setCurrentMonth}
                     events={events}
                     onAddEvent={addEvent}
-                    setEvents={setEvents}
-                    onDeleteEvent={handleDeleteEvent}
+                    onDeleteEvent={deleteEvent}
+                    onUpdateEvent={updateEvent}
                 />
             ) : view === 'week' ? (
                 <CalendarWeek
-                    currentMonth={currentMonth}
+                    currentMonth={currentDate}
                     events={events}
-                    setEvents={setEvents}
                     onAddEvent={addEvent}
+                    onDeleteEvent={deleteEvent}
+                    onUpdateEvent={updateEvent}
                 />
             ) : view === 'work-week' ? (
                 <CalendarWorkWeek
-                    currentMonth={currentMonth}
+                    currentMonth={currentDate}
                     events={events}
                     onAddEvent={addEvent}
+                    onDeleteEvent={deleteEvent}
+                    onUpdateEvent={updateEvent}
                 />
             ) : (
                 <CalendarDays
                     events={events}
                     onAddEvent={addEvent}
-                    setEvents={setEvents}
-                    onDeleteEvent={handleDeleteEvent}
+                    onDeleteEvent={deleteEvent}
+                    onUpdateEvent={updateEvent}
                 />
             )}
         </div>

@@ -51,17 +51,25 @@ const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEv
     };
 
     const handleDeleteClick = (eventId) => {
+        console.log("Suppression demandée pour l'événement ID:", eventId);
         setEventToDelete(eventId);
         setShowDeleteModal(true);
     };
 
+
     const confirmDelete = () => {
         if (eventToDelete) {
+            console.log("Suppression confirmée pour l'événement ID:", eventToDelete);
             onDeleteEvent(eventToDelete);
             setShowDeleteModal(false);
             setEventToDelete(null);
+        } else {
+            console.log("Aucun événement à supprimer");
         }
     };
+
+
+
 
     const handleEditEvent = (updatedEvent) => {
         onUpdateEvent(updatedEvent);
@@ -95,7 +103,7 @@ const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEv
                 </div>
                 <button
                     onClick={onClose}
-                    className="text-gray-500 cursor-pointer hover:text-gray-700 transition-colors text-sm"
+                    className="text-gray-500 cursor-pointer  hover:text-gray-700 transition-colors text-sm"
                 >
                     ✖
                 </button>
@@ -112,9 +120,9 @@ const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEv
                     {eventList.map((event, index) => (
                         <div
                             key={event.id || index}
-                            className="bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-all duration-200"
+                            className="bg-white rounded-lg border border-gray-200 hover:border-[#E8F3F2] transition-all duration-200"
                         >
-                            <div className="p-3 border-l-4 rounded-lg border-blue-500">
+                            <div className="p-3 border-l-4 rounded-lg border-[#238781]">
                                 <div className="flex justify-between items-start mb-1.5">
                                     <h3 className="text-sm font-semibold text-gray-800">
                                         {event.title}
@@ -128,7 +136,7 @@ const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEv
                                         </button>
 
                                         <button
-                                            onClick={() => handleDeleteClick(event.id)}
+                                            onClick={() => handleDeleteClick(event._id)}
                                             className="p-1 hover:bg-red-200 cursor-pointer rounded-full transition-colors"
                                         >
                                             <Icon path={mdiDelete} size={0.8} className="text-gray-600" />
@@ -186,9 +194,9 @@ const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEv
             {/* Affichage du modal de modification si showEditModal est true */}
             {showEditModal && eventToEdit && (
                 <EditEventModal
-                    isOpen={showEditModal}  
+                    isOpen={showEditModal}
                     onClose={() => setShowEditModal(false)}
-                    eventToEdit={eventToEdit} 
+                    eventToEdit={eventToEdit}
                     onEditEvent={handleEditEvent}
                 />
             )}

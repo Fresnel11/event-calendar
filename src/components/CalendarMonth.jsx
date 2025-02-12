@@ -5,12 +5,14 @@ import EventModal from './EventModal';
 import Notification from './Notification';
 import Icon from '@mdi/react';
 import { mdiArrowLeftDropCircle, mdiArrowRightDropCircle } from '@mdi/js';
+import { useEventStore } from '../context/EventStore';
 
-const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent, events, setEvents, onDeleteEvent }) => {
+const CalendarMonth = ({ currentMonth, setCurrentMonth,  onAddEvent, events, setEvents, onDeleteEvent }) => {
     const [selectedDate, setSelectedDate] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [notification, setNotification] = useState(null);
+    const { updateEvent } = useEventStore();
 
 
     useEffect(() => {
@@ -25,16 +27,19 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent, events, setE
             ...eventData
         };
         onAddEvent(newEvent);
+        setNotification({ message: 'Événement ajouté avec succès!', type: 'success' });
+        setTimeout(() => setNotification(null), 4000);
     };
 
 
 
     const handleUpdateEvent = (updatedEvent) => {
-        setEvents((prevEvents) =>
-            prevEvents.map((event) =>
-                event.id === updatedEvent.id ? updatedEvent : event
-            )
-        );
+        updateEvent(updatedEvent._id, updatedEvent);
+        // updateEvent((prevEvents) =>
+        //     prevEvents.map((event) =>
+        //         event.id === updatedEvent._id ? updatedEvent : event
+        //     )
+        // );
         setNotification({ message: 'Événement modifié avec succès!', type: 'success' });
         setTimeout(() => setNotification(null), 4000);
     };
@@ -43,7 +48,7 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent, events, setE
 
     // Supprimer un événement
     const handleDeleteEvent = (eventId) => {
-        setEvents(prevEvents => prevEvents.filter(event => event.id !== eventId));
+        // setEvents(prevEvents => prevEvents.filter(event => event.id !== eventId));
 
         setNotification({ message: 'Événement supprimé avec succès!', type: 'error' });
         setTimeout(() => setNotification(null), 4000);
@@ -151,8 +156,8 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent, events, setE
                         >
                             <div
                                 className={`flex items-center justify-center w-7 h-7 text-sm rounded-full 
-                                    ${isToday(day.date) ? 'bg-blue-600 text-white' : 'text-gray-900 hover:bg-gray-100'}
-                                    ${selectedDate && selectedDate.toDateString() === day.date.toDateString() ? 'bg-blue-400 text-white' : ''}`}
+                                    ${isToday(day.date) ? 'bg-[#238781] text-white' : 'text-gray-900 hover:bg-gray-100'}
+                                    ${selectedDate && selectedDate.toDateString() === day.date.toDateString() ? 'bg-[#3ebeb4] text-white' : ''}`}
                             >
                                 {day.day}
                             </div>
@@ -164,7 +169,7 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent, events, setE
                                     .map((event, eventIndex) => (
                                         <div
                                             key={event.id || eventIndex}
-                                            className="px-2 py-1 text-xs rounded-md bg-blue-100 text-blue-800 truncate hover:bg-blue-200 transition-colors"
+                                            className="px-2 py-1 text-xs rounded-md bg-[#E8F3F2] text-teal-800 truncate hover:bg-[#C0DCDA] transition-colors"
                                             title={event.title}
                                         >
                                             {!event.allDay && event.startTime && (
