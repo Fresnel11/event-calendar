@@ -7,7 +7,7 @@ import Icon from '@mdi/react';
 import { mdiArrowLeftDropCircle, mdiArrowRightDropCircle } from '@mdi/js';
 import { useEventStore } from '../context/EventStore';
 
-const CalendarMonth = ({ currentMonth, setCurrentMonth,  onAddEvent, events, setEvents, onDeleteEvent }) => {
+const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent, events, setEvents, onDeleteEvent }) => {
     const [selectedDate, setSelectedDate] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -50,7 +50,7 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth,  onAddEvent, events, set
     const handleDeleteEvent = (eventId) => {
         // setEvents(prevEvents => prevEvents.filter(event => event.id !== eventId));
 
-        setNotification({ message: 'Événement supprimé avec succès!', type: 'error' });
+        setNotification({ message: 'Événement supprimé avec succès!', type: 'success' });
         setTimeout(() => setNotification(null), 4000);
 
         onDeleteEvent(eventId);
@@ -102,7 +102,7 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth,  onAddEvent, events, set
 
     const handleDayDoubleClick = (date) => {
         setSelectedDate(date);
-        setIsModalOpen(true); 
+        setIsModalOpen(true);
     };
 
     const closeModal = () => {
@@ -130,9 +130,9 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth,  onAddEvent, events, set
             <div className={`transition-all duration-300 ${isSidebarOpen ? 'w-5/6' : 'w-full'} bg-white`}>
                 <div className="flex items-center justify-between p-4 border-b">
                     <div className="flex items-center space-x-2">
-                        <button onClick={handlePrevMonth} className="p-1 cursor-pointer rounded-sm"><Icon path={mdiArrowLeftDropCircle} size={1} /></button>
-                        <button onClick={handleNextMonth} className="p-1 cursor-pointer rounded-sm"><Icon path={mdiArrowRightDropCircle} size={1} /></button>
-                        <h2 className="text-lg font-semibold text-gray-900">
+                        <button onClick={handlePrevMonth} className="p-1 cursor-pointer rounded-sm"><Icon path={mdiArrowLeftDropCircle} size={1.3} color={'#238781'} /></button>
+                        <button onClick={handleNextMonth} className="p-1 cursor-pointer rounded-sm"><Icon path={mdiArrowRightDropCircle} size={1.3} color={'#238781'} /></button>
+                        <h2 className="text-lg font-semibold text-[#238781]">
                             {currentMonth.toLocaleString('fr-FR', { month: 'long', year: 'numeric' })}
                         </h2>
                     </div>
@@ -163,24 +163,80 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth,  onAddEvent, events, set
                             </div>
 
                             {/* Affichage des événements */}
-                            <div className="mt-1 space-y-1 overflow-y-auto max-h-[calc(100%-2rem)]">
+                            <div
+                                className={`
+    mt-1 space-y-1
+    ${events.length > 2 ? 'max-h-[calc(100%-2rem)] overflow-auto' : ''}
+  `}
+                            >
                                 {events
-                                    .filter(event => new Date(event.startDate).toDateString() === day.date.toDateString())
-                                    .map((event, eventIndex) => (
-                                        <div
-                                            key={event.id || eventIndex}
-                                            className="px-2 py-1 text-xs rounded-md bg-[#E8F3F2] text-teal-800 truncate hover:bg-[#C0DCDA] transition-colors"
-                                            title={event.title}
-                                        >
-                                            {!event.allDay && event.startTime && (
-                                                <span className="mr-1 font-medium">
-                                                    {event.startTime}
-                                                </span>
-                                            )}
-                                            {event.title}
-                                        </div>
-                                    ))}
+                                    .filter(event => {
+                                        const eventStart = new Date(event.startDate);
+                                        const eventEnd = new Date(event.endDate);
+                                        const currentDate = day.date;
+
+                                        // Normaliser les dates pour comparer uniquement les dates sans les heures
+                                        const normalizedEventStart = new Date(
+                                            eventStart.getFullYear(),
+                                            eventStart.getMonth(),
+                                            eventStart.getDate()
+                                        );
+                                        const normalizedEventEnd = new Date(
+                                            eventEnd.getFullYear(),
+                                            eventEnd.getMonth(),
+                                            eventEnd.getDate()
+                                        );
+                                        const normalizedCurrentDate = new Date(
+                                            currentDate.getFullYear(),
+                                            currentDate.getMonth(),
+                                            currentDate.getDate()
+                                        );
+
+                                        // Vérifier si la date actuelle est comprise entre la date de début et de fin
+                                        return normalizedCurrentDate >= normalizedEventStart &&
+                                            normalizedCurrentDate <= normalizedEventEnd;
+                                    })
+                                    .map((event, eventIndex) => {
+                                        const eventStart = new Date(event.startDate);
+                                        const eventEnd = new Date(event.endDate);
+                                        const isFirstDay = eventStart.toDateString() === day.date.toDateString();
+                                        const isLastDay = eventEnd.toDateString() === day.date.toDateString();
+                                        const isMultiDay = eventStart.toDateString() !== eventEnd.toDateString();
+
+                                        return (
+                                            <div
+                                                key={event.id || eventIndex}
+                                                className={`
+            px-2 py-1 text-xs 
+            ${isMultiDay ? 'rounded-none' : 'rounded-md'}
+            ${isFirstDay ? 'rounded-l-md' : ''}
+            ${isLastDay ? 'rounded-r-md' : ''}
+            ${isMultiDay && !isFirstDay ? '-ml-2' : ''}
+            ${isMultiDay && !isLastDay ? '-mr-2' : ''}
+            bg-[#E8F3F2] text-teal-800 
+            truncate hover:bg-[#C0DCDA] 
+            transition-colors
+            relative
+            ${isMultiDay ? 'border-1 border-teal-800' : ''}
+          `}
+                                                style={{
+                                                    marginLeft: isMultiDay && !isFirstDay ? '-2px' : undefined,
+                                                    marginRight: isMultiDay && !isLastDay ? '-2px' : undefined,
+                                                }}
+                                                title={`${event.title} (${new Date(event.startDate).toLocaleDateString()} - ${new Date(event.endDate).toLocaleDateString()})`}
+                                            >
+                                                {/* Afficher l'heure uniquement le premier jour si c'est un événement sur plusieurs jours */}
+                                                {!event.allDay && event.startTime && isFirstDay && (
+                                                    <span className="mr-1 font-medium">
+                                                        {event.startTime}
+                                                    </span>
+                                                )}
+                                                {event.title}
+                                            </div>
+                                        );
+                                    })}
                             </div>
+
                         </div>
                     ))}
                 </div>

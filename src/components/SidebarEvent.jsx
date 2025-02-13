@@ -3,14 +3,16 @@ import PropTypes from 'prop-types';
 import purpleCalendar from '../assets/purplecalendar.png';
 import Icon from '@mdi/react';
 import { mdiClockOutline, mdiRepeat, mdiDelete, mdiPencil } from '@mdi/js';
-import EditEventModal from './EditEventModal'; // Assure-toi d'importer ton modal
+import EditEventModal from './EditEventModal';
+import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 
 const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEvent }) => {
     const [eventList, setEventList] = useState([]);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [eventToDelete, setEventToDelete] = useState(null);
+    const [open, setOpen] = useState(true)
 
-    // Nouvel état pour contrôler l'affichage du modal de modification
     const [showEditModal, setShowEditModal] = useState(false);
     const [eventToEdit, setEventToEdit] = useState(null);
 
@@ -79,7 +81,7 @@ const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEv
     // Fonction pour ouvrir le modal de modification
     const handleEditClick = (event) => {
         setEventToEdit(event);
-        setShowEditModal(true); // Ouvre le modal en définissant showEditModal à true
+        setShowEditModal(true); 
         console.log('edit', event);
         console.log(showEditModal)
     };
@@ -112,7 +114,7 @@ const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEv
             {eventList.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-[calc(100vh-160px)]">
                     <img src={purpleCalendar} alt="Calendrier" className=" opacity-50" />
-                    <p className="text-gray-500 text-1xl font-bold text-center">Aucun événement prévu ce jour.</p>
+                    <p onClick={() => setOpen(true)} className="text-gray-500 text-1xl font-bold text-center">Aucun événement prévu ce jour.</p>
                     <p className='text-gray-500 text-xs text-center'>Passez une bonne journée !</p>
                 </div>
             ) : (
@@ -129,7 +131,7 @@ const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEv
                                     </h3>
                                     <div className="flex space-x-1">
                                         <button
-                                            onClick={() => handleEditClick(event)} // Ouvre le modal lors du clic
+                                            onClick={() => handleEditClick(event)} 
                                             className="p-1 hover:bg-blue-200 cursor-pointer rounded-full transition-colors"
                                         >
                                             <Icon path={mdiPencil} size={0.8} className="text-gray-600" />
@@ -167,29 +169,60 @@ const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEv
                 </div>
             )}
 
-            {/* Modal de confirmation */}
-            {showDeleteModal && (
-                <div className="fixed inset-0 flex items-center justify-center backdrop-blur-xs bg-opacity-50">
-                    <div className="bg-white p-6 rounded-lg shadow-lg">
-                        <h2 className="text-lg font-semibold text-gray-800 mb-3">Confirmer la suppression</h2>
-                        <p className="text-sm text-gray-600 mb-4">Êtes-vous sûr de vouloir supprimer cet événement ?</p>
-                        <div className="flex justify-end space-x-2">
-                            <button
-                                onClick={() => setShowDeleteModal(false)}
-                                className="px-4 py-2 bg-none cursor-pointer text-gray-700 hover:text-gray-400 rounded-lg transition-colors"
+            {showDeleteModal  && (
+                <Dialog open={open} onClose={setOpen} className="relative z-10">
+                    <DialogBackdrop
+                        transition
+                        className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
+                    />
+
+                    <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+                        <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                            <DialogPanel
+                                transition
+                                className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg data-closed:sm:translate-y-0 data-closed:sm:scale-95"
                             >
-                                Annuler
-                            </button>
-                            <button
-                                onClick={confirmDelete}
-                                className="px-4 py-2 bg-red-500 cursor-pointer text-white rounded-lg hover:bg-red-600 transition-colors"
-                            >
-                                Supprimer
-                            </button>
+                                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                    <div className="sm:flex sm:items-start">
+                                        <div className="mx-auto flex size-12 shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:size-10">
+                                            <ExclamationTriangleIcon aria-hidden="true" className="size-6 text-red-600" />
+                                        </div>
+                                        <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                                            <DialogTitle as="h3" className="text-base font-semibold text-gray-900">
+                                            Confirmer la suppression
+                                            </DialogTitle>
+                                            <div className="mt-2">
+                                                <p className="text-sm text-gray-500">
+                                                Êtes-vous sûr de vouloir supprimer cet événement ?
+                                                Cette action est irréversible !
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                                    <button
+                                        type="button"
+                                        onClick={confirmDelete}
+                                        className="inline-flex cursor-pointer w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-red-500 sm:ml-3 sm:w-auto"
+                                        >
+                                        Supprimer
+                                    </button>
+                                    <button
+                                        type="button"
+                                        data-autofocus
+                                        onClick={() => setShowDeleteModal(false)}
+                                        className="mt-3 cursor-pointer inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 shadow-xs ring-gray-300 ring-inset hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                                    >
+                                        Annuler
+                                    </button>
+                                </div>
+                            </DialogPanel>
                         </div>
                     </div>
-                </div>
+                </Dialog>
             )}
+
 
             {/* Affichage du modal de modification si showEditModal est true */}
             {showEditModal && eventToEdit && (

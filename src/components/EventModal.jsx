@@ -74,7 +74,7 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
         };
 
         onAddEvent(event);
-        onClose(); 
+        onClose();
     };
 
 
@@ -83,7 +83,7 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
             {/* Notification */}
             {notification && (
                 <div className="fixed bottom-4 right-4 z-99">
-                    <Notification  key={notification.message} message={notification.message} type={notification.type} />
+                    <Notification key={notification.message} message={notification.message} type={notification.type} />
                 </div>
             )}
             {isOpen && (
@@ -100,11 +100,11 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.95, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="bg-white text-black rounded-xl shadow-2xl w-full max-w-3xl mx-4 overflow-hidden"
+                        className="bg-white text-black rounded-xl shadow-lg w-full max-w-3xl mx-4 overflow-hidden"
                     >
                         {/* Header */}
-                        <div className="px-6 py-4 border-b bg-white flex items-center justify-between">
-                            <h2 className="text-xl font-semibold text-gray-800">
+                        <div className="px-6 py-4 shadow-sm bg-white flex items-center justify-between">
+                            <h2 className="text-2xl font-semibold text-gray-800">
                                 Ajouter un événement
                             </h2>
                             <Icon path={mdiTableLargePlus} size={1} />
@@ -112,82 +112,72 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
 
                         {/* Content */}
                         <div className="px-6 py-4 max-h-[calc(100vh-200px)] overflow-y-auto">
-                            <div className="space-y-4">
+                            <div className="space-y-6">
                                 {/* Titre */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Titre
                                     </label>
-                                    <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                                        <input
-                                            type="text"
-                                            className="w-full px-3 py-2 bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                            value={title}
-                                            onChange={(e) => setTitle(e.target.value)}
-                                            placeholder="Titre de l'événement"
-                                        />
-                                    </div>
+                                    <input
+                                        type="text"
+                                        className="w-full border-b-2 border-gray-300 focus:border-[#238781] focus:outline-none transition-colors py-2"
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value)}
+                                        placeholder="Titre de l'événement"
+                                    />
                                 </div>
 
                                 {/* Dates */}
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                             Date de début
                                         </label>
-                                        <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                                            <input
-                                                type="date"
-                                                className="w-full px-3 py-2 bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                                value={startDate.toLocaleDateString('fr-CA')}
-                                                onChange={(e) => setStartDate(new Date(e.target.value))}
-                                            />
-                                        </div>
+                                        <input
+                                            type="date"
+                                            className="w-full border-b-2 border-gray-300 focus:border-[#238781] focus:outline-none transition-colors py-2"
+                                            value={startDate.toLocaleDateString('fr-CA')}
+                                            onChange={(e) => setStartDate(new Date(e.target.value))}
+                                        />
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                             Date de fin
                                         </label>
-                                        <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                                            <input
-                                                type="date"
-                                                className="w-full px-3 py-2 bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                                value={endDate.toLocaleDateString('fr-CA')}
-                                                onChange={(e) => setEndDate(new Date(e.target.value))}
-                                            />
-                                        </div>
+                                        <input
+                                            type="date"
+                                            className="w-full border-b-2 border-gray-300 focus:border-[#238781] focus:outline-none transition-colors py-2"
+                                            value={endDate.toLocaleDateString('fr-CA')}
+                                            onChange={(e) => setEndDate(new Date(e.target.value))}
+                                        />
                                     </div>
                                 </div>
 
                                 {/* Heures */}
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                             Heure de début
                                         </label>
-                                        <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                                            <input
-                                                type="time"
-                                                className="w-full px-3 py-2 bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:opacity-50"
-                                                disabled={allDay}
-                                                value={startTime}
-                                                onChange={(e) => setStartTime(e.target.value)}
-                                            />
-                                        </div>
+                                        <input
+                                            type="time"
+                                            className="w-full border-b-2 border-gray-300 focus:border-[#238781] focus:outline-none transition-colors py-2"
+                                            disabled={allDay}
+                                            value={startTime}
+                                            onChange={(e) => setStartTime(e.target.value)}
+                                        />
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                             Heure de fin
                                         </label>
-                                        <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                                            <input
-                                                type="time"
-                                                className="w-full px-3 py-2 bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:opacity-50"
-                                                disabled={allDay}
-                                                value={endTime}
-                                                onChange={(e) => setEndTime(e.target.value)}
-                                            />
-                                        </div>
+                                        <input
+                                            type="time"
+                                            className="w-full border-b-2 border-gray-300 focus:border-[#238781] focus:outline-none transition-colors py-2"
+                                            disabled={allDay}
+                                            value={endTime}
+                                            onChange={(e) => setEndTime(e.target.value)}
+                                        />
                                     </div>
                                 </div>
 
@@ -201,37 +191,31 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
                                             onChange={() => setAllDay(!allDay)}
                                             className="sr-only peer"
                                         />
-                                        <div className="group peer bg-white rounded-full duration-300 w-10 h-5 ring-2 ring-red-500 
-                        after:duration-300 after:bg-red-500 peer-checked:after:bg-green-500 peer-checked:ring-green-500 
-                        after:rounded-full after:absolute after:h-3 after:w-3 after:top-1 after:left-1 
-                        after:flex after:justify-center after:items-center peer-checked:after:translate-x-5 
-                        peer-hover:after:scale-95">
+                                        <div className="w-10 h-5 relative bg-gray-300 rounded-full peer-checked:bg-[#238781] transition-colors duration-300">
+                                            <div className="dot absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-transform duration-300 peer-checked:translate-x-8"></div>
                                         </div>
                                     </label>
-                                    <label htmlFor="allDay" className="ml-2 text-sm">
+                                    <label htmlFor="allDay" className="ml-2 text-sm text-gray-700">
                                         Toute la journée
                                     </label>
                                 </div>
-
 
                                 {/* Récurrence */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Répétition
                                     </label>
-                                    <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                                        <select
-                                            className="w-full px-3 py-2 bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                            value={recurrence}
-                                            onChange={(e) => setRecurrence(e.target.value)}
-                                        >
-                                            <option value="none">Ne pas répéter</option>
-                                            <option value="daily">Tous les jours</option>
-                                            <option value="weekly">Toutes les semaines</option>
-                                            <option value="monthly">Tous les mois</option>
-                                            <option value="yearly">Tous les ans</option>
-                                        </select>
-                                    </div>
+                                    <select
+                                        className="w-full border-b-2 border-gray-300 focus:border-[#238781] focus:outline-none transition-colors py-2"
+                                        value={recurrence}
+                                        onChange={(e) => setRecurrence(e.target.value)}
+                                    >
+                                        <option value="none">Ne pas répéter</option>
+                                        <option value="daily">Tous les jours</option>
+                                        <option value="weekly">Toutes les semaines</option>
+                                        <option value="monthly">Tous les mois</option>
+                                        <option value="yearly">Tous les ans</option>
+                                    </select>
                                 </div>
 
                                 {/* Lieu */}
@@ -239,15 +223,13 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Lieu
                                     </label>
-                                    <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                                        <input
-                                            type="text"
-                                            className="w-full px-3 py-2 bg-white text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                            value={location}
-                                            onChange={(e) => setLocation(e.target.value)}
-                                            placeholder="Lieu de l'événement"
-                                        />
-                                    </div>
+                                    <input
+                                        type="text"
+                                        className="w-full border-b-2 border-gray-300 focus:border-[#238781] focus:outline-none transition-colors py-2"
+                                        value={location}
+                                        onChange={(e) => setLocation(e.target.value)}
+                                        placeholder="Lieu de l'événement"
+                                    />
                                 </div>
 
                                 {/* Description */}
@@ -255,29 +237,27 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Description
                                     </label>
-                                    <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                                        <textarea
-                                            className="w-full px-3 py-2 bg-white text-black    transition-colors min-h-[100px]"
-                                            value={description}
-                                            onChange={(e) => setDescription(e.target.value)}
-                                            placeholder="Description de l'événement"
-                                        ></textarea>
-                                    </div>
+                                    <textarea
+                                        className="w-full border-b-2 border-gray-300 focus:border-[#238781] focus:outline-none transition-colors py-2 min-h-[100px]"
+                                        value={description}
+                                        onChange={(e) => setDescription(e.target.value)}
+                                        placeholder="Description de l'événement"
+                                    ></textarea>
                                 </div>
                             </div>
                         </div>
 
                         {/* Footer */}
-                        <div className="px-6 py-4 bg-white border-t flex justify-end space-x-2">
+                        <div className="px-6 py-4 bg-white shadow-sm flex justify-end space-x-2">
                             <button
                                 onClick={onClose}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-none cursor-pointer rounded-lg hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                                className="px-4 py-2 text-sm font-medium text-red-500 bg-white border-none cursor-pointer rounded-lg  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
                             >
                                 Annuler
                             </button>
                             <button
                                 onClick={handleAddEvent}
-                                className="px-4 py-2 text-sm font-medium cursor-pointer text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                                className="px-4 py-2 text-sm font-medium cursor-pointer text-white bg-[#238781] border border-transparent rounded-lg hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                             >
                                 Ajouter
                             </button>

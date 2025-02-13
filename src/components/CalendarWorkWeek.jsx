@@ -108,7 +108,7 @@ const CalendarWorkWeek = ({ events, setEvents, onEditEvent, onAddEvent, onDelete
         if (typeof onDeleteEvent === 'function') {
             onDeleteEvent(selectedEvent._id);
             setContextMenu(null);
-            setNotification({ message: 'Événement supprimé avec succès!', type: 'error' });
+            setNotification({ message: 'Événement supprimé avec succès!', type: 'success' });
             setTimeout(() => setNotification(null), 4000);
         } else {
             console.error("onDeleteEvent n'est pas une fonction");
@@ -154,7 +154,7 @@ const CalendarWorkWeek = ({ events, setEvents, onEditEvent, onAddEvent, onDelete
         updateEvent(updatedEvent._id, updatedEvent);
         setContextMenu(null);
 
-        
+
         setNotification({ message: 'Événement modifié avec succès!', type: 'success' });
         setTimeout(() => setNotification(null), 4000);
     };
@@ -244,15 +244,15 @@ const CalendarWorkWeek = ({ events, setEvents, onEditEvent, onAddEvent, onDelete
                             onClick={handlePrevWeek}
                             className="p-1 cursor-pointer rounded"
                         >
-                            <Icon path={mdiArrowLeftDropCircle} size={1} />
+                            <Icon path={mdiArrowLeftDropCircle} size={1.3} color={'#238781'} />
                         </button>
                         <button
                             onClick={handleNextWeek}
                             className="p-1 cursor-pointer rounded"
                         >
-                            <Icon path={mdiArrowRightDropCircle} size={1} />
+                            <Icon path={mdiArrowRightDropCircle} size={1.3} color={'#238781'} />
                         </button>
-                        <h2 className="text-lg font-semibold text-gray-900">
+                        <h2 className="text-lg font-semibold text-[#238781]">
                             {`${workWeekDays[0].toLocaleDateString('fr-FR', { month: 'long', day: 'numeric' })} - ${workWeekDays[4].toLocaleDateString('fr-FR', { month: 'long', day: 'numeric', year: 'numeric' })}`}
                         </h2>
                     </div>
@@ -392,24 +392,31 @@ const CalendarWorkWeek = ({ events, setEvents, onEditEvent, onAddEvent, onDelete
                                 )}
                                 {filteredEvents
                                     .filter(event => {
-                                        const eventDate = normalizeDate(event.startDate);
-                                        const currentDayNormalized = normalizeDate(currentDay); // Normalisation de la date du jour courant
-                                        return eventDate.toISOString().split('T')[0] === currentDayNormalized.toISOString().split('T')[0]; // Filtrage par date
+                                        const eventStartDate = new Date(event.startDate).toISOString().split('T')[0];
+                                        const eventEndDate = new Date(event.endDate).toISOString().split('T')[0];
+                                        const currentDate = currentDay.toISOString().split('T')[0];
+
+                                        // L'événement doit être affiché sur toute sa durée
+                                        return eventStartDate <= currentDate && eventEndDate >= currentDate;
                                     })
                                     .map((event, index) => {
                                         const style = calculateEventStyle(event);
+                                        const isStartDate = new Date(event.startDate).toISOString().split('T')[0] === currentDay.toISOString().split('T')[0];
+
                                         return (
                                             <div
                                                 key={index}
-                                                className="absolute left-1 rounded-sm right-1 bg-[#E8F3F2] border-l-4 border-[#238781] rounded-r-md shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+                                                className={`absolute left-1 rounded-sm right-1 bg-[#E8F3F2] w-full shadow-sm hover:shadow-md transition-shadow overflow-hidden 
+                    ${isStartDate ? 'border-l-4 border-[#238781] rounded-r-md' : 'border-none'}`}
                                                 style={style}
                                                 onContextMenu={(e) => handleRightClick(e, event)}
                                             >
                                                 <div className="p-2">
-                                                    <div className="text-sm font-medium text-gray-800 truncate">
+                                                    {/* Afficher le titre et l'heure uniquement le premier jour de l'événement */}
+                                                    <div className={`text-sm font-medium text-gray-800 truncate ${!isStartDate ? 'hidden' : 'block'}`}>
                                                         {event.title}
                                                     </div>
-                                                    <div className="text-xs text-gray-600">
+                                                    <div className={`text-xs text-gray-600 ${!isStartDate ? 'hidden' : 'block'}`}>
                                                         {event.startTime
                                                             ? event.startTime
                                                             : new Date(event.startDate).toLocaleTimeString('fr-FR', {
@@ -428,6 +435,7 @@ const CalendarWorkWeek = ({ events, setEvents, onEditEvent, onAddEvent, onDelete
                                             </div>
                                         );
                                     })}
+
                             </div>
                         ))}
                     </div>

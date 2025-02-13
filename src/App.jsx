@@ -4,12 +4,14 @@ import CalendarWeek from './components/CalendarWeek';
 import CalendarWorkWeek from './components/CalendarWorkWeek';
 import CalendarDays from './components/CalendarDays';
 import NavBar from './components/NavBar';
+import EventModal from './components/EventModal';
 import { useEventStore } from './context/EventStore'; // Import du store
 
 function App() {
     const [view, setView] = useState('month'); // 'month', 'week', 'workweek', 'day'
     const [currentDate, setCurrentDate] = useState(new Date());
     const [currentMonth, setCurrentMonth] = useState(new Date()); // Stocke la date actuelle
+    const [isModalOpen, setIsModalOpen] = useState(false); // Gère l'affichage du modal
 
     // Accès à l'état global du store
     const { state, fetchEvents, addEvent, deleteEvent, updateEvent } = useEventStore();
@@ -22,26 +24,27 @@ function App() {
         }
     }, [events.length, fetchEvents]);
 
-    // Fonction pour générer la semaine actuelle
-    function getCurrentWeek() {
-        const today = new Date();
-        const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay())); // Premier jour de la semaine (dimanche)
-        const week = [];
-        for (let i = 0; i < 7; i++) {
-            const day = new Date(startOfWeek);
-            day.setDate(startOfWeek.getDate() + i);
-            week.push(day);
-        }
-        return week;
-    }
-
     // Fonction pour revenir au jour actuel
     function goToToday() {
         setCurrentDate(new Date()); // Mettre à jour la date actuelle
-        setView('day'); // Si tu veux revenir directement en vue "jour"
+        setView('day');
     }
 
-    // Affichage des événements selon la vue
+    // Fonction pour ouvrir et fermer le modal
+    function openModal() {
+        setIsModalOpen(true);
+    }
+
+    function closeModal() {
+        setIsModalOpen(false);
+    }
+
+    // Fonction pour gérer l'ajout d'un événement (exemple simplifié)
+    function handleAddEvent(event) {
+        addEvent(event);
+        closeModal();
+    }
+
     return (
         <div className="App">
             <NavBar setView={setView} goToToday={goToToday} /> {/* Passe goToToday à NavBar */}
@@ -78,6 +81,23 @@ function App() {
                     onAddEvent={addEvent}
                     onDeleteEvent={deleteEvent}
                     onUpdateEvent={updateEvent}
+                />
+            )}
+
+            {/* Bouton flottant pour ajouter un événement */}
+            <button
+                onClick={openModal}
+                className="fixed bottom-6 cursor-pointer right-6 bg-[#238781] text-white font-bold py-3 px-5 rounded-full shadow-lg hover:bg-teal-700 transition-all"
+            >
+                +
+            </button>
+
+            {/* Modal d'ajout d'événement */}
+            {isModalOpen && (
+                <EventModal
+                    isOpen={isModalOpen}
+                    onClose={closeModal}
+                    onAddEvent={handleAddEvent}
                 />
             )}
         </div>
