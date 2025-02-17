@@ -118,13 +118,15 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Titre
                                     </label>
-                                    <input
-                                        type="text"
-                                        className="w-full border-b-2 border-gray-300 focus:border-[#238781] focus:outline-none transition-colors py-2"
-                                        value={title}
-                                        onChange={(e) => setTitle(e.target.value)}
-                                        placeholder="Titre de l'événement"
-                                    />
+                                    <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+                                        <input
+                                            type="text"
+                                            className="w-full border-b-2 border-gray-300 focus:border-[#238781] focus:outline-none transition-colors py-2"
+                                            value={title}
+                                            onChange={(e) => setTitle(e.target.value)}
+                                            placeholder="Titre de l'événement"
+                                        />
+                                    </div>
                                 </div>
 
                                 {/* Dates */}
@@ -191,11 +193,14 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
                                             onChange={() => setAllDay(!allDay)}
                                             className="sr-only peer"
                                         />
-                                        <div className="w-10 h-5 relative bg-gray-300 rounded-full peer-checked:bg-[#238781] transition-colors duration-300">
-                                            <div className="dot absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-transform duration-300 peer-checked:translate-x-8"></div>
+                                        <div className="group peer bg-white rounded-full duration-300 w-10 h-5 ring-2 ring-red-500 
+                        after:duration-300 after:bg-red-500 peer-checked:after:bg-[#238781] peer-checked:ring-[#238781] 
+                        after:rounded-full after:absolute after:h-3 after:w-3 after:top-1 after:left-1 
+                        after:flex after:justify-center after:items-center peer-checked:after:translate-x-5 
+                        peer-hover:after:scale-95">
                                         </div>
                                     </label>
-                                    <label htmlFor="allDay" className="ml-2 text-sm text-gray-700">
+                                    <label htmlFor="allDay" className="ml-2 text-sm">
                                         Toute la journée
                                     </label>
                                 </div>
@@ -257,7 +262,7 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
                             </button>
                             <button
                                 onClick={handleAddEvent}
-                                className="px-4 py-2 text-sm font-medium cursor-pointer text-white bg-[#238781] border border-transparent rounded-lg hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                                className="px-4 py-2 text-sm font-medium cursor-pointer text-white bg-[#238781] border border-transparent rounded-lg hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors"
                             >
                                 Ajouter
                             </button>

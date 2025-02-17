@@ -4,7 +4,7 @@ import SidebarEvent from './SidebarEvent';
 import EventModal from './EventModal';
 import Notification from './Notification';
 import Icon from '@mdi/react';
-import { mdiArrowLeftDropCircle, mdiArrowRightDropCircle } from '@mdi/js';
+import { mdiArrowLeftDropCircle, mdiArrowRightDropCircle, mdiCalendarToday } from '@mdi/js';
 import { useEventStore } from '../context/EventStore';
 
 const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent, events, setEvents, onDeleteEvent }) => {
@@ -13,6 +13,7 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent, events, setE
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [notification, setNotification] = useState(null);
     const { updateEvent } = useEventStore();
+    const [selectedTodayDate, setSelectedTodayDate] = useState(new Date());
 
 
     useEffect(() => {
@@ -29,6 +30,12 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent, events, setE
         onAddEvent(newEvent);
         setNotification({ message: 'Événement ajouté avec succès!', type: 'success' });
         setTimeout(() => setNotification(null), 4000);
+    };
+
+    const goToToday = () => {
+        const today = new Date();
+        setSelectedDate(today);
+        setCurrentMonth(new Date(today.getFullYear(), today.getMonth(), 1)); 
     };
 
 
@@ -136,6 +143,20 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent, events, setE
                             {currentMonth.toLocaleString('fr-FR', { month: 'long', year: 'numeric' })}
                         </h2>
                     </div>
+                    <div className="flex items-center justify-center space-x-4 relative group">
+                        <Icon
+                            onClick={goToToday}
+                            path={mdiCalendarToday}
+                            size={1.5}
+                            color={'#238781'}
+                            className="cursor-pointer hover:text-gray-800 transition-colors"
+                        />
+
+                        {/* Tooltip qui apparaît au survol */}
+                        <div className="absolute hidden group-hover:block text-white bg-gray-700 text-xs rounded-lg py-1 px-2 bottom-full mb-2">
+                            Aujourd'hui
+                        </div>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-7">
@@ -149,25 +170,24 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent, events, setE
                         <div
                             key={index}
                             className={`relative h-24 p-1 border-b border-r cursor-pointer 
-                                ${selectedDate && selectedDate.toDateString() === day.date.toDateString() ? 'bg-blue-200' : ''} 
-                                ${!day.isCurrentMonth ? 'bg-gray-50' : 'bg-white'}`}
+            ${selectedDate && selectedDate.toDateString() === day.date.toDateString() ? 'bg-blue-200' : ''} 
+            ${!day.isCurrentMonth ? 'bg-gray-50' : 'bg-white'}`}
                             onClick={() => handleDayClick(day.date)}
                             onDoubleClick={() => handleDayDoubleClick(day.date)}
                         >
                             <div
                                 className={`flex items-center justify-center w-7 h-7 text-sm rounded-full 
-                                    ${isToday(day.date) ? 'bg-[#238781] text-white' : 'text-gray-900 hover:bg-gray-100'}
-                                    ${selectedDate && selectedDate.toDateString() === day.date.toDateString() ? 'bg-[#3ebeb4] text-white' : ''}`}
+                ${isToday(day.date) ? 'bg-[#238781] text-white' : 'text-gray-900 hover:bg-gray-100'}
+                ${selectedDate && selectedDate.toDateString() === day.date.toDateString() ? 'bg-[#3ebeb4] text-white' : ''}`}
                             >
                                 {day.day}
                             </div>
-
                             {/* Affichage des événements */}
                             <div
                                 className={`
-    mt-1 space-y-1
-    ${events.length > 2 ? 'max-h-[calc(100%-2rem)] overflow-auto' : ''}
-  `}
+        mt-1 space-y-1
+        ${events.length > 2 ? 'max-h-[calc(100%-2rem)] overflow-auto' : ''}
+    `}
                             >
                                 {events
                                     .filter(event => {
@@ -207,31 +227,40 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent, events, setE
                                             <div
                                                 key={event.id || eventIndex}
                                                 className={`
-            px-2 py-1 text-xs 
-            ${isMultiDay ? 'rounded-none' : 'rounded-md'}
-            ${isFirstDay ? 'rounded-l-md' : ''}
-            ${isLastDay ? 'rounded-r-md' : ''}
-            ${isMultiDay && !isFirstDay ? '-ml-2' : ''}
-            ${isMultiDay && !isLastDay ? '-mr-2' : ''}
-            bg-[#E8F3F2] text-teal-800 
-            truncate hover:bg-[#C0DCDA] 
-            transition-colors
-            relative
-            ${isMultiDay ? 'border-1 border-teal-800' : ''}
-          `}
+                        px-2 py-1 text-xs 
+                        ${isMultiDay ? 'rounded-none' : 'rounded-md'}
+                        ${isFirstDay ? 'rounded-l-md' : ''}
+                        ${isLastDay ? 'rounded-r-md' : ''}
+                        ${isMultiDay && !isFirstDay ? '-ml-2' : ''}
+                        ${isMultiDay && !isLastDay ? '-mr-2' : ''}
+                        bg-[#E8F3F2] text-teal-800 
+                        truncate hover:bg-[#C0DCDA] 
+                        transition-colors
+                        relative
+                        ${isMultiDay ? 'border-1 border-teal-800' : ''}
+                        h-10
+                    `}
                                                 style={{
                                                     marginLeft: isMultiDay && !isFirstDay ? '-2px' : undefined,
                                                     marginRight: isMultiDay && !isLastDay ? '-2px' : undefined,
                                                 }}
                                                 title={`${event.title} (${new Date(event.startDate).toLocaleDateString()} - ${new Date(event.endDate).toLocaleDateString()})`}
                                             >
-                                                {/* Afficher l'heure uniquement le premier jour si c'est un événement sur plusieurs jours */}
-                                                {!event.allDay && event.startTime && isFirstDay && (
+                                                {/* Afficher "Début" uniquement si c'est le premier jour d'un événement multi-jours */}
+                                                {isFirstDay && isMultiDay && (
+                                                    <span className="mr-1 font-medium">Début</span>
+                                                )}
+                                                {/* Afficher le titre uniquement le premier jour */}
+                                                {isFirstDay && !event.allDay && event.startTime && (
                                                     <span className="mr-1 font-medium">
                                                         {event.startTime}
                                                     </span>
                                                 )}
-                                                {event.title}
+                                                {isFirstDay && event.title}
+                                                {/* Afficher "En cours" sur les jours intermédiaires */}
+                                                {isMultiDay && !isFirstDay && !isLastDay && <span className="ml-1 font-medium">En cours</span>}
+                                                {/* Afficher "Fin" uniquement si c'est le dernier jour d'un événement multi-jours */}
+                                                {isLastDay && isMultiDay && <span className="ml-1 font-medium">Fin</span>}
                                             </div>
                                         );
                                     })}

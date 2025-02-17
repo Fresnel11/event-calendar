@@ -1,11 +1,25 @@
 import { useState, useEffect } from 'react';
 import Icon from '@mdi/react';
-import { mdiArrowLeftDropCircle, mdiArrowRightDropCircle } from '@mdi/js';
+import { mdiArrowLeftDropCircle, mdiArrowRightDropCircle, mdiCalendarToday } from '@mdi/js';
 import EventModal from './EventModal';
 import EditEventModal from './EditEventModal';
 import Notification from './Notification';
 import { useEventStore } from '../context/EventStore';
+import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 
+/**
+ * Composant de calendrier de travail affichant les événements sur une période de 5 jours
+ * (du lundi au vendredi). Il permet de visualiser les événements, les créer, les modifier
+ * et les supprimer. Il utilise les hooks d'état pour gérer les événements et les notifications.
+ *
+ * @param {Array} events - Liste des événements à afficher
+ * @param {Function} setEvents - Fonction pour mettre à jour la liste des événements
+ * @param {Function} onEditEvent - Fonction pour modifier un événement
+ * @param {Function} onAddEvent - Fonction pour ajouter un événement
+ * @param {Function} onDeleteEvent - Fonction pour supprimer un événement
+ * @returns {ReactElement} - Le composant de calendrier
+ */
 const CalendarWorkWeek = ({ events, setEvents, onEditEvent, onAddEvent, onDeleteEvent }) => {
     const [currentWeekStart, setCurrentWeekStart] = useState(getStartOfWeek(new Date()));
     const [currentTime, setCurrentTime] = useState(new Date());
@@ -18,6 +32,7 @@ const CalendarWorkWeek = ({ events, setEvents, onEditEvent, onAddEvent, onDelete
     const [editModal, setEditModal] = useState(false);
     const [contextMenu, setContextMenu] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [open, setOpen] = useState(true)
     const { updateEvent } = useEventStore();
 
     useEffect(() => {
@@ -67,6 +82,13 @@ const CalendarWorkWeek = ({ events, setEvents, onEditEvent, onAddEvent, onDelete
         setSelectedDate(date);
         setShowModal(true);
         console.log('Date sélectionnée:', date);
+    };
+
+    const goToToday = () => {
+        const today = new Date();
+        const startOfWeek = getStartOfWeek(today);
+        setCurrentWeekStart(startOfWeek);
+        setSelectedDate(today);
     };
 
     const handleRightClick = (event, eventData) => {
@@ -238,7 +260,7 @@ const CalendarWorkWeek = ({ events, setEvents, onEditEvent, onAddEvent, onDelete
             )}
             <div onClick={closeContextMenu} className="flex flex-col h-full bg-white">
                 {/* Header avec navigation */}
-                <div className="flex items-center px-4 py-2 border-b">
+                <div className="flex items-center  px-4 py-2 border-b justify-between">
                     <div className="flex items-center space-x-2">
                         <button
                             onClick={handlePrevWeek}
@@ -255,6 +277,19 @@ const CalendarWorkWeek = ({ events, setEvents, onEditEvent, onAddEvent, onDelete
                         <h2 className="text-lg font-semibold text-[#238781]">
                             {`${workWeekDays[0].toLocaleDateString('fr-FR', { month: 'long', day: 'numeric' })} - ${workWeekDays[4].toLocaleDateString('fr-FR', { month: 'long', day: 'numeric', year: 'numeric' })}`}
                         </h2>
+                        <div className="flex items-center justify-center translate-x-320 relative group">
+                            <Icon
+                                onClick={goToToday}
+                                path={mdiCalendarToday}
+                                size={1.5}
+                                color={'#238781'}
+                                className="cursor-pointer hover:text-gray-800 transition-colors"
+                            />
+                            {/* Tooltip qui apparaît au survol */}
+                            <div className="absolute hidden group-hover:block text-white bg-gray-700 text-xs rounded-lg py-1 px-2 bottom-full mb-2">
+                                Aujourd'hui
+                            </div>
+                        </div>
                     </div>
                 </div>
                 {/* En-tête des jours de la semaine (Lundi à Vendredi) */}
@@ -357,26 +392,77 @@ const CalendarWorkWeek = ({ events, setEvents, onEditEvent, onAddEvent, onDelete
                                 )}
 
                                 {showDeleteModal && (
-                                    <div className="fixed inset-0 flex items-center justify-center backdrop-blur-xs bg-opacity-50">
-                                        <div className="bg-white p-6 rounded-lg shadow-lg">
-                                            <h2 className="text-lg font-semibold text-gray-800 mb-3">Confirmer la suppression</h2>
-                                            <p className="text-sm text-gray-600 mb-4">Êtes-vous sûr de vouloir supprimer cet événement ?</p>
-                                            <div className="flex justify-end space-x-2">
-                                                <button
-                                                    onClick={() => setShowDeleteModal(false)}
-                                                    className="px-4 py-2 bg-none cursor-pointer text-gray-700 hover:text-gray-400 rounded-lg transition-colors"
+                                    // <div className="fixed inset-0 flex items-center justify-center backdrop-blur-xs bg-opacity-50">
+                                    //     <div className="bg-white p-6 rounded-lg shadow-lg">
+                                    //         <h2 className="text-lg font-semibold text-gray-800 mb-3">Confirmer la suppression</h2>
+                                    //         <p className="text-sm text-gray-600 mb-4">Êtes-vous sûr de vouloir supprimer cet événement ?</p>
+                                    //         <div className="flex justify-end space-x-2">
+                                    //             <button
+                                    //                 onClick={() => setShowDeleteModal(false)}
+                                    //                 className="px-4 py-2 bg-none cursor-pointer text-gray-700 hover:text-gray-400 rounded-lg transition-colors"
+                                    //             >
+                                    //                 Annuler
+                                    //             </button>
+                                    //             <button
+                                    //                 onClick={handleDeleteEvent}
+                                    //                 className="px-4 py-2 bg-red-500 cursor-pointer text-white rounded-lg hover:bg-red-600 transition-colors"
+                                    //             >
+                                    //                 Supprimer
+                                    //             </button>
+                                    //         </div>
+                                    //     </div>
+                                    // </div>
+                                    <Dialog open={open} onClose={setOpen} className="relative z-10">
+                                        <DialogBackdrop
+                                            transition
+                                            className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
+                                        />
+
+                                        <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+                                            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                                                <DialogPanel
+                                                    transition
+                                                    className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg data-closed:sm:translate-y-0 data-closed:sm:scale-95"
                                                 >
-                                                    Annuler
-                                                </button>
-                                                <button
-                                                    onClick={handleDeleteEvent}
-                                                    className="px-4 py-2 bg-red-500 cursor-pointer text-white rounded-lg hover:bg-red-600 transition-colors"
-                                                >
-                                                    Supprimer
-                                                </button>
+                                                    <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                                        <div className="sm:flex sm:items-start">
+                                                            <div className="mx-auto flex size-12 shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:size-10">
+                                                                <ExclamationTriangleIcon aria-hidden="true" className="size-6 text-red-600" />
+                                                            </div>
+                                                            <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                                                                <DialogTitle as="h3" className="text-base font-semibold text-gray-900">
+                                                                    Confirmer la suppression
+                                                                </DialogTitle>
+                                                                <div className="mt-2">
+                                                                    <p className="text-sm text-gray-500">
+                                                                        Êtes-vous sûr de vouloir supprimer cet événement ?
+                                                                        Cette action est irréversible !
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                                                        <button
+                                                            type="button"
+                                                            onClick={handleDeleteEvent}
+                                                            className="inline-flex cursor-pointer w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-red-500 sm:ml-3 sm:w-auto"
+                                                        >
+                                                            Supprimer
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            data-autofocus
+                                                            onClick={() => setShowDeleteModal(false)}
+                                                            className="mt-3 cursor-pointer inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 shadow-xs ring-gray-300 ring-inset hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                                                        >
+                                                            Annuler
+                                                        </button>
+                                                    </div>
+                                                </DialogPanel>
                                             </div>
                                         </div>
-                                    </div>
+                                    </Dialog>
                                 )}
 
                                 {showModal && (
