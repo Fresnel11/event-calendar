@@ -10,15 +10,18 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@schedule-x/drag-and-drop": "^2.17.0",
-    "@schedule-x/event-modal": "^2.17.0",
-    "@schedule-x/events-service": "^2.17.0",
-    "@schedule-x/react": "^2.17.0",
-    "@schedule-x/theme-default": "^2.17.0",
+    "@headlessui/react": "^2.2.0",
+    "@heroicons/react": "^2.2.0",
+    "@material-tailwind/react": "^2.1.10",
+    "@mdi/js": "^7.4.47",
+    "@mdi/react": "^1.6.1",
     "@tailwindcss/vite": "^4.0.3",
+    "axios": "^1.7.9",
+    "framer-motion": "^12.4.1",
+    "lucide-react": "^0.475.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "tailwindcss": "^4.0.3"
+    "react-tooltip": "^5.28.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",
@@ -30,6 +33,7 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.18",
     "globals": "^15.14.0",
+    "tailwindcss": "^4.0.4",
     "vite": "^6.1.0"
   }
 }
