@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Icon from '@mdi/react';
-import { mdiArrowLeftDropCircle, mdiArrowRightDropCircle, mdiCalendarToday } from '@mdi/js';
+import { mdiArrowLeftDropCircle, mdiArrowRightDropCircle, mdiCalendarToday, mdiPencilCircle, mdiDeleteCircle } from '@mdi/js';
 import EventModal from './EventModal';
 import EditEventModal from './EditEventModal';
 import Notification from './Notification';
@@ -379,31 +379,7 @@ const CalendarWeek = ({ events, setEvents, onEditEvent, onAddEvent, onDeleteEven
                                     })}
 
 
-                                {contextMenu && (
-                                    <div
-                                        className="bg-white border border-gray-300 rounded-lg shadow-lg z-30 transition transform duration-200 ease-in-out"
-                                        style={{
-                                            position: 'fixed',
-                                            top: contextMenu.y,
-                                            left: contextMenu.x,
-                                        }}
-                                    >
-                                        <div
-                                            className="flex items-center px-4 py-3 hover:bg-blue-100 cursor-pointer transition duration-200 ease-in-out rounded-t-lg"
-                                            onClick={handleOpenModal}
-                                        >
-                                            <svg className="w-4 h-4 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M10 0a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm0-4h-2V5h2v6z" /></svg>
-                                            <span className="font-semibold text-gray-800">Modifier</span>
-                                        </div>
-                                        <div
-                                            className="flex items-center px-4 py-3 hover:bg-red-100 cursor-pointer transition duration-200 ease-in-out"
-                                            onClick={() => setShowDeleteModal(true)}
-                                        >
-                                            <svg className="w-4 h-4 mr-2 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path d="M10 0a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm0-4h-2V5h2v6z" /></svg>
-                                            <span className="font-semibold text-gray-800">Supprimer</span>
-                                        </div>
-                                    </div>
-                                )}
+                                
 
                                 {editModal && (
                                     <EditEventModal
@@ -479,17 +455,17 @@ const CalendarWeek = ({ events, setEvents, onEditEvent, onAddEvent, onDeleteEven
                                         }}
                                     >
                                         <div
-                                            className="flex items-center px-4 py-3 hover:bg-blue-100 cursor-pointer transition duration-200 ease-in-out rounded-t-lg"
+                                            className="flex items-center shadow-sm px-4 py-3 hover:bg-blue-100 cursor-pointer transition duration-200 ease-in-out rounded-t-lg"
                                             onClick={handleOpenModal}
                                         >
-                                            <svg className="w-4 h-4 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M10 0a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm0-4h-2V5h2v6z" /></svg>
+                                            <Icon className="w-4 h-4 mr-2" path={mdiPencilCircle} size={1} color={'blue'} />
                                             <span className="font-semibold text-gray-800">Modifier</span>
                                         </div>
                                         <div
                                             className="flex items-center px-4 py-3 hover:bg-red-100 cursor-pointer transition duration-200 ease-in-out"
                                             onClick={() => setShowDeleteModal(true)}
                                         >
-                                            <svg className="w-4 h-4 mr-2 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path d="M10 0a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm0-4h-2V5h2v6z" /></svg>
+                                            <Icon className="w-4 h-4 mr-2" path={mdiDeleteCircle} size={1} color={'red'}/>
                                             <span className="font-semibold text-gray-800">Supprimer</span>
                                         </div>
                                     </div>

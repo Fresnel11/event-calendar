@@ -25,6 +25,7 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
     const [location, setLocation] = useState('');
     const [description, setDescription] = useState('');
     const [notification, setNotification] = useState(null);
+    const [reminder, setReminder] = useState('none');
 
     // Fermer le modal avec la touche Escape
     useEffect(() => {
@@ -55,12 +56,14 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
     };
 
     const handleAddEvent = () => {
+        // Validation des horaires si nécessaire
         if (!allDay && (!startTime || !endTime)) {
             setNotification({ message: "Veuillez définir l'heure de début et de fin pour l'événement.", type: 'error' });
             setTimeout(() => setNotification(null), 4000);
             return;
         }
 
+        // Création de l'objet événement
         const event = {
             title,
             startDate,
@@ -71,11 +74,14 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
             recurrence,
             location,
             description,
+            reminder,
         };
 
+        // Appeler la fonction pour ajouter l'événement
         onAddEvent(event);
         onClose();
     };
+
 
 
     return (
@@ -248,6 +254,26 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
                                         onChange={(e) => setDescription(e.target.value)}
                                         placeholder="Description de l'événement"
                                     ></textarea>
+                                </div>
+                                {/* Rappel */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Rappel avant l'événement</label>
+                                    <select
+                                        className="w-full border-b-2 border-gray-300 focus:border-[#238781] focus:outline-none transition-colors py-2"
+                                        value={reminder}
+                                        onChange={(e) => setReminder(e.target.value)}
+                                    >
+                                        <option value="none">Aucun rappel</option>
+                                        <option value="at_event_time">Au moment de l'événement</option>
+                                        <option value="5_min_before">5 minutes avant</option>
+                                        <option value="15_min_before">15 minutes avant</option>
+                                        <option value="30_min_before">30 minutes avant</option>
+                                        <option value="1_hour_before">1 heure avant</option>
+                                        <option value="2_hours_before">2 heures avant</option>
+                                        <option value="12_hours_before">12 heures avant</option>
+                                        <option value="1_day_before">1 jour avant</option>
+                                        <option value="1_week_before">1 semaine avant</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Icon from '@mdi/react';
-import { mdiArrowLeftDropCircle, mdiArrowRightDropCircle, mdiCalendarToday } from '@mdi/js';
+import { mdiArrowLeftDropCircle, mdiArrowRightDropCircle, mdiCalendarToday, mdiPencilCircle, mdiDeleteCircle } from '@mdi/js';
 import EventModal from './EventModal';
 import EditEventModal from './EditEventModal';
 import Notification from './Notification';
@@ -8,18 +8,7 @@ import { useEventStore } from '../context/EventStore';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 
-/**
- * Composant de calendrier de travail affichant les événements sur une période de 5 jours
- * (du lundi au vendredi). Il permet de visualiser les événements, les créer, les modifier
- * et les supprimer. Il utilise les hooks d'état pour gérer les événements et les notifications.
- *
- * @param {Array} events - Liste des événements à afficher
- * @param {Function} setEvents - Fonction pour mettre à jour la liste des événements
- * @param {Function} onEditEvent - Fonction pour modifier un événement
- * @param {Function} onAddEvent - Fonction pour ajouter un événement
- * @param {Function} onDeleteEvent - Fonction pour supprimer un événement
- * @returns {ReactElement} - Le composant de calendrier
- */
+
 const CalendarWorkWeek = ({ events, setEvents, onEditEvent, onAddEvent, onDeleteEvent }) => {
     const [currentWeekStart, setCurrentWeekStart] = useState(getStartOfWeek(new Date()));
     const [currentTime, setCurrentTime] = useState(new Date());
@@ -367,17 +356,17 @@ const CalendarWorkWeek = ({ events, setEvents, onEditEvent, onAddEvent, onDelete
                                         }}
                                     >
                                         <div
-                                            className="flex items-center px-4 py-3 hover:bg-blue-100 cursor-pointer transition duration-200 ease-in-out rounded-t-lg"
+                                            className="flex items-center shadow-sm px-4 py-3 hover:bg-blue-100 cursor-pointer transition duration-200 ease-in-out rounded-t-lg"
                                             onClick={handleOpenModal}
                                         >
-                                            <svg className="w-4 h-4 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M10 0a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm0-4h-2V5h2v6z" /></svg>
+                                            <Icon className="w-4 h-4 mr-2" path={mdiPencilCircle} size={1} color={'blue'} />
                                             <span className="font-semibold text-gray-800">Modifier</span>
                                         </div>
                                         <div
                                             className="flex items-center px-4 py-3 hover:bg-red-100 cursor-pointer transition duration-200 ease-in-out"
                                             onClick={() => setShowDeleteModal(true)}
                                         >
-                                            <svg className="w-4 h-4 mr-2 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path d="M10 0a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm0-4h-2V5h2v6z" /></svg>
+                                            <Icon className="w-4 h-4 mr-2" path={mdiDeleteCircle} size={1} color={'red'}/>
                                             <span className="font-semibold text-gray-800">Supprimer</span>
                                         </div>
                                     </div>

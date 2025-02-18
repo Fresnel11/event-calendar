@@ -14,6 +14,7 @@ const EditEventModal = ({ isOpen, onClose, eventToEdit, onEditEvent }) => {
     const [recurrence, setRecurrence] = useState('none');
     const [location, setLocation] = useState('');
     const [description, setDescription] = useState('');
+    const [reminder, setReminder] = useState('none');
 
     // Mettre à jour les valeurs du formulaire quand l'événement est ouvert pour modification
     useEffect(() => {
@@ -27,6 +28,7 @@ const EditEventModal = ({ isOpen, onClose, eventToEdit, onEditEvent }) => {
             setRecurrence(eventToEdit.recurrence || 'none');
             setLocation(eventToEdit.location || '');
             setDescription(eventToEdit.description || '');
+            setReminder(eventToEdit.reminder || 'none');  // Rappel par défaut
         }
     }, [eventToEdit]);
 
@@ -70,6 +72,7 @@ const EditEventModal = ({ isOpen, onClose, eventToEdit, onEditEvent }) => {
             recurrence: recurrence || 'none', // La récurrence est une valeur par défaut
             location: location || undefined,
             description: description || undefined,
+            reminder: reminder || 'none',
         };
         onEditEvent(updatedEvent);
         onClose();
@@ -240,7 +243,29 @@ const EditEventModal = ({ isOpen, onClose, eventToEdit, onEditEvent }) => {
                                     ></textarea>
                                 </div>
                             </div>
+                            {/* Rappel */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Rappel avant l'événement</label>
+                                <select
+                                    className="w-full border-b-2 border-gray-300 focus:border-[#238781] focus:outline-none transition-colors py-2"
+                                    value={reminder}
+                                    onChange={(e) => setReminder(e.target.value)}
+                                >
+                                    <option value="none">Aucun rappel</option>
+                                    <option value="at_event_time">Au moment de l'événement</option>
+                                    <option value="5_min_before">5 minutes avant</option>
+                                    <option value="15_min_before">15 minutes avant</option>
+                                    <option value="30_min_before">30 minutes avant</option>
+                                    <option value="1_hour_before">1 heure avant</option>
+                                    <option value="2_hours_before">2 heures avant</option>
+                                    <option value="12_hours_before">12 heures avant</option>
+                                    <option value="1_day_before">1 jour avant</option>
+                                    <option value="1_week_before">1 semaine avant</option>
+                                </select>
+                            </div>
                         </div>
+
+
 
                         {/* Footer */}
                         <div className="px-6 py-4 bg-white shadow-sm flex justify-end space-x-2">

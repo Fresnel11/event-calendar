@@ -7,6 +7,7 @@ const initialState = {
     events: [],
     loading: false,
     error: null,
+    notifications: [], // Nouvel état pour les notifications
 };
 
 // Actions
@@ -15,6 +16,7 @@ const ADD_EVENT = 'ADD_EVENT';
 const DELETE_EVENT = 'DELETE_EVENT';
 const UPDATE_EVENT = 'UPDATE_EVENT';
 const SET_ERROR = 'SET_ERROR';
+const ADD_NOTIFICATION = 'ADD_NOTIFICATION'; // Nouvelle action pour les notifications
 
 // Reducer
 const eventReducer = (state, action) => {
@@ -34,6 +36,8 @@ const eventReducer = (state, action) => {
             };
         case SET_ERROR:
             return { ...state, error: action.payload, loading: false };
+        case ADD_NOTIFICATION:
+            return { ...state, notifications: [...state.notifications, action.payload] }; 
         default:
             return state;
     }
@@ -75,10 +79,7 @@ export const EventProvider = ({ children }) => {
     };
 
     const updateEvent = async (eventId, updatedEvent) => {
-        console.log(eventId);
-        console.log(updatedEvent);
         try {
-            
             const response = await axios.put(`http://localhost:5000/api/events/${eventId}`, updatedEvent);
             dispatch({ type: UPDATE_EVENT, payload: response.data });
         } catch (err) {
@@ -86,8 +87,13 @@ export const EventProvider = ({ children }) => {
         }
     };
 
+    // Action pour ajouter une notification
+    const addNotification = (notification) => {
+        dispatch({ type: ADD_NOTIFICATION, payload: notification });
+    };
+
     return (
-        <EventContext.Provider value={{ state, fetchEvents, addEvent, deleteEvent, updateEvent }}>
+        <EventContext.Provider value={{ state, fetchEvents, addEvent, deleteEvent, updateEvent, addNotification }}>
             {children}
         </EventContext.Provider>
     );

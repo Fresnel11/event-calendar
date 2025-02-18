@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import purpleCalendar from '../assets/purplecalendar.png';
+import light from '../assets/light.svg';
 import Icon from '@mdi/react';
 import { mdiClockOutline, mdiRepeat, mdiDelete, mdiPencil } from '@mdi/js';
 import EditEventModal from './EditEventModal';
@@ -113,7 +114,7 @@ const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEv
 
             {eventList.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-[calc(100vh-160px)]">
-                    <img src={purpleCalendar} alt="Calendrier" className=" opacity-50" />
+                    <img src={purpleCalendar} alt="Calendrier" className=" opacity-50 w-45" />
                     <p onClick={() => setOpen(true)} className="text-gray-500 text-1xl font-bold text-center">Aucun événement prévu ce jour.</p>
                     <p className='text-gray-500 text-xs text-center'>Passez une bonne journée !</p>
                 </div>

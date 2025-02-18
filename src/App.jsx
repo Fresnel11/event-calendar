@@ -26,7 +26,34 @@ function App() {
         if (events.length === 0) {
             fetchEvents(); // Appel pour charger les événements depuis l'API
         }
-    }, [events.length, fetchEvents]);
+    }, []);
+
+    // Écoute de la connexion WebSocket pour les notifications
+    useEffect(() => {
+        const ws = new WebSocket('ws://localhost:8080'); // URL de ton serveur WebSocket
+
+        ws.onopen = () => {
+            console.log('Connexion WebSocket établie');
+        };
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            // Assurer qu'un message contient une notification
+            if (data.message) {
+                setNotification({ message: data.message, type: data.type || 'info' });
+                setTimeout(() => setNotification(null), 8000); // Fermer la notification après 4 secondes
+            }
+        };
+
+        ws.onerror = (error) => {
+            console.error('Erreur WebSocket:', error);
+        };
+
+        // Fermer la connexion WebSocket lorsque le composant est démonté
+        return () => {
+            ws.close();
+        };
+    }, []);
 
     // Fonction pour revenir au jour actuel
     function goToToday() {
@@ -102,7 +129,6 @@ function App() {
             >
                 <Icon path={mdiPlus} size={1.5} />
             </button>
-
 
             {/* Modal d'ajout d'événement */}
             {isModalOpen && (
