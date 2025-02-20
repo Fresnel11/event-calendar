@@ -66,55 +66,6 @@ const CalendarDays = ({ events, onAddEvent, onEditEvent, onDeleteEvent, setEvent
     const formatDate = (date) => {
         return date.toISOString().split('T')[0];
     };
-
-    // const calculateEventStyle = (event) => {
-    //     if (!event.startDate || !event.endDate) {
-    //         console.error("L'événement doit avoir des dates de début et de fin.");
-    //         return { top: '0%', height: '0%' };
-    //     }
-
-    //     const startTime = new Date(event.startDate);
-    //     const endTime = new Date(event.endDate);
-
-    //     // Gérer les événements en "all-day"
-    //     if (event.allDay) {
-    //         return {
-    //             top: '0%',
-    //             height: '100%',
-    //         };
-    //     }
-
-    //     let startHour = startTime.getHours() + startTime.getMinutes() / 60;
-    //     let endHour = endTime.getHours() + endTime.getMinutes() / 60;
-
-    //     // Vérification et conversion des heures personnalisées
-    //     if (event.startTime && /^[0-9]{2}:[0-9]{2}$/.test(event.startTime)) {
-    //         const [startHourPart, startMinutePart] = event.startTime.split(':').map(Number);
-    //         startHour = startHourPart + startMinutePart / 60;
-    //     }
-    //     if (event.endTime && /^[0-9]{2}:[0-9]{2}$/.test(event.endTime)) {
-    //         const [endHourPart, endMinutePart] = event.endTime.split(':').map(Number);
-    //         endHour = endHourPart + endMinutePart / 60;
-    //     }
-
-    //     if (endHour < startHour) {
-    //         endHour += 24;
-    //     }
-
-    //     const duration = Math.max(endHour - startHour, 0); // Éviter une hauteur négative
-
-    //     return {
-    //         top: `${(startHour / 24) * 100}%`,
-    //         height: `${(duration / 24) * 100}%`,
-    //     };
-    // };
-
-
-    // const eventsForDay = events.filter(event => {
-    //     const eventDate = new Date(event.startDate);
-    //     const selectedDay = formatDate(selectedDate);
-    //     return formatDate(eventDate) === selectedDay;
-    // });
     const calculateEventStyle = (event) => {
         const eventStart = new Date(event.startDate);
         const eventEnd = new Date(event.endDate);

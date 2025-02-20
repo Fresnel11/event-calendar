@@ -7,6 +7,7 @@ import Icon from '@mdi/react';
 import { mdiArrowLeftDropCircle, mdiArrowRightDropCircle, mdiCalendarToday } from '@mdi/js';
 import { useEventStore } from '../context/EventStore';
 
+
 const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent, events, setEvents, onDeleteEvent }) => {
     const [selectedDate, setSelectedDate] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -42,11 +43,6 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent, events, setE
 
     const handleUpdateEvent = (updatedEvent) => {
         updateEvent(updatedEvent._id, updatedEvent);
-        // updateEvent((prevEvents) =>
-        //     prevEvents.map((event) =>
-        //         event.id === updatedEvent._id ? updatedEvent : event
-        //     )
-        // );
         setNotification({ message: 'Événement modifié avec succès!', type: 'success' });
         setTimeout(() => setNotification(null), 4000);
     };

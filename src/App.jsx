@@ -6,7 +6,8 @@ import CalendarDays from './components/CalendarDays';
 import NavBar from './components/NavBar';
 import EventModal from './components/EventModal';
 import { useEventStore } from './context/EventStore';
-import Notification from './components/Notification';
+import NotificationToast from './components/Notification';
+// import notif_sound from './'
 import Icon from '@mdi/react';
 import { mdiPlus } from '@mdi/js'
 
@@ -30,7 +31,7 @@ function App() {
 
     // Écoute de la connexion WebSocket pour les notifications
     useEffect(() => {
-        const ws = new WebSocket('ws://localhost:8080'); // URL de ton serveur WebSocket
+        const ws = new WebSocket('ws://localhost:8080');
 
         ws.onopen = () => {
             console.log('Connexion WebSocket établie');
@@ -41,8 +42,26 @@ function App() {
             // Assurer qu'un message contient une notification
             if (data.message) {
                 setNotification({ message: data.message, type: data.type || 'info' });
-                setTimeout(() => setNotification(null), 8000); // Fermer la notification après 4 secondes
+                setTimeout(() => setNotification(null), 8000);
+                const audio = new Audio('/assets/notif_sound.wav');
+                audio.play().catch(error => console.error("Erreur lecture audio :", error));
             }
+
+            if (Notification.permission === "granted" && data.message) {
+                const notification = new Notification("Nouvelle notification", {
+                    body: data.message || "Nouvelle notification !",
+                    // icon: "/icons/notification.png", // Remplace par un chemin valide
+                })
+
+                const audio = new Audio(notif_sound);
+                audio.play().catch(error => console.error("Erreur lecture audio :", error));
+
+                notification.onclick = () => {
+                    window.focus(); // Met l'onglet en avant
+                    window.location.href = "http://localhost:5173/"; // Redirige vers l'URL          }
+                }
+            }
+
         };
 
         ws.onerror = (error) => {
@@ -54,6 +73,67 @@ function App() {
             ws.close();
         };
     }, []);
+
+
+    // Enregistrement du Service Worker pour Web Push
+    useEffect(() => {
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker
+                    .register('/service-worker.jsx')
+                    .then((registration) => {
+                        console.log('Service Worker enregistré avec succès:', registration);
+                    })
+                    .catch((error) => {
+                        console.log('Erreur d\'enregistrement du Service Worker:', error);
+                    });
+            });
+        }
+    }, []);
+
+
+
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding)
+            .replace(/-/g, '+')
+            .replace(/_/g, '/');
+
+        const rawData = atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+    }
+
+    useEffect(() => {
+        const subscribeUserToPush = async () => {
+            const swRegistration = await navigator.serviceWorker.ready;
+
+            // S'abonner aux notifications Push
+            const subscription = await swRegistration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(process.env.REACT_APP_VAPID_PUBLIC_KEY)
+            });
+
+            console.log('Utilisateur abonné aux notifications push:', subscription);
+
+            // Envoi de la souscription au serveur
+            fetch('/api/save-subscription', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(subscription),
+            });
+        };
+
+        if ('Notification' in window && 'serviceWorker' in navigator) {
+            subscribeUserToPush();
+        }
+    }, []);
+
+
 
     // Fonction pour revenir au jour actuel
     function goToToday() {
@@ -82,7 +162,7 @@ function App() {
         <div className="App">
             {/* Notification */}
             {notification && (
-                <Notification message={notification.message} type={notification.type} />
+                <NotificationToast message={notification.message} type={notification.type} />
             )}
             <NavBar setView={setView} goToToday={goToToday} />
             {loading && <p>Chargement des événements...</p>}
