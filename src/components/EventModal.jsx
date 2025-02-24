@@ -27,6 +27,11 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
     const [notification, setNotification] = useState(null);
     const [reminder, setReminder] = useState('none');
 
+    // Participants
+    const [participantSearch, setParticipantSearch] = useState('');
+    const [participantResults, setParticipantResults] = useState([]);
+    const [selectedParticipants, setSelectedParticipants] = useState([]);
+
     // Fermer le modal avec la touche Escape
     useEffect(() => {
         const handleEscape = (e) => {
@@ -55,6 +60,25 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
         }
     };
 
+    // Rechercher les participants
+    const searchParticipants = async (email) => {
+        if (email.length >= 3) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/users/search?email=${email}`);
+                const data = await response.json();
+                setParticipantResults(data);
+            } catch (error) {
+                console.error('Erreur lors de la recherche des participants:', error);
+            }
+        } else {
+            setParticipantResults([]);
+        }
+    };
+
+    useEffect(() => {
+        searchParticipants(participantSearch);
+    }, [participantSearch]);
+
     const handleAddEvent = () => {
         // Validation des horaires si nécessaire
         if (!allDay && (!startTime || !endTime)) {
@@ -75,6 +99,7 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
             location,
             description,
             reminder,
+            participants: selectedParticipants.map(user => ({ user: user._id, status: 'pending' })),
         };
 
         // Appeler la fonction pour ajouter l'événement
@@ -134,6 +159,60 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
                                         />
                                     </div>
                                 </div>
+
+                                {/* Participants */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Participants
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="w-full border-b-2 border-gray-300 focus:border-[#238781] focus:outline-none transition-colors py-2"
+                                        placeholder="Rechercher un participant par e-mail"
+                                        value={participantSearch}
+                                        onChange={(e) => setParticipantSearch(e.target.value)}
+                                    />
+                                    {participantResults.length > 0 && (
+                                        <div className="mt-2 space-y-2">
+                                            {participantResults.map((user) => (
+                                                <div
+                                                    key={user._id}
+                                                    className="flex items-center justify-between p-2 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200"
+                                                    onClick={() => {
+                                                        setSelectedParticipants([...selectedParticipants, user]);
+                                                        setParticipantSearch('');
+                                                        setParticipantResults([]);
+                                                    }}
+                                                >
+                                                    <span>{user.email}</span>
+                                                    <span className="text-sm text-gray-500">Ajouter</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {selectedParticipants.length > 0 && (
+                                    <div className="mt-4">
+                                        <h3 className="text-sm font-medium text-gray-700 mb-2">Participants sélectionnés</h3>
+                                        <div className="space-y-2">
+                                            {selectedParticipants.map((user, index) => (
+                                                <div key={index} className="flex items-center justify-between p-2 bg-gray-100 rounded-lg">
+                                                    <span>{user.email}</span>
+                                                    <button
+                                                        onClick={() => {
+                                                            setSelectedParticipants(selectedParticipants.filter((_, i) => i !== index));
+                                                        }}
+                                                        className="text-sm text-red-500 hover:text-red-700"
+                                                    >
+                                                        Supprimer
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
 
                                 {/* Dates */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
