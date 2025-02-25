@@ -82,39 +82,53 @@ export const EventProvider = ({ children }) => {
 
     // Actions pour les requêtes API
     const fetchEvents = async () => {
+        const storedToken = localStorage.getItem('auth_token');
+        if (!storedToken) {
+            addNotification({ message: 'Vous devez être connecté pour voir les événements.', type: 'error' });
+            return;
+        }
+
         try {
-            const response = await axios.get('http://localhost:5000/api/events');
+            const response = await axios.get('http://localhost:5000/api/events', {
+                headers: { Authorization: `Bearer ${storedToken}` }
+            });
             dispatch({ type: FETCH_EVENTS, payload: response.data });
         } catch (err) {
             dispatch({ type: SET_ERROR, payload: err.message });
         }
     };
 
+
     const addEvent = async (newEvent) => {
-        const { user } = state; // Récupérer l'utilisateur depuis le state du store
-        console.log('user', user);
-        
-        if (!user || !user._id) {
-            // Si l'utilisateur n'est pas défini ou que son ID est manquant
+        const storedToken = localStorage.getItem('auth_token'); // Récupérer le token depuis localStorage
+
+        if (!storedToken) {
             addNotification({ message: 'Vous devez être connecté pour ajouter un événement.', type: 'error' });
             return;
         }
-        
 
-        // Ajouter l'ID de l'utilisateur dans l'objet événement
-        const eventWithUser = {
-            ...newEvent,
-            createdBy: user._id,  // Ajouter l'ID de l'utilisateur ici
-        };
-        console.log('event', eventWithUser);
-        
         try {
+            // Décoder le token pour obtenir les informations de l'utilisateur
+            const decodedToken = jwtDecode(storedToken);
+            const userId = decodedToken.userId; // Supposons que le token contient un champ `userId`
+
+            // Ajouter l'ID de l'utilisateur dans l'objet événement
+            const eventWithUser = {
+                ...newEvent,
+                createdBy: userId,  // Ajouter l'ID de l'utilisateur ici
+            };
+
+            console.log('event', eventWithUser);
+
+            // Envoi de l'événement au backend
             const response = await axios.post('http://localhost:5000/api/addevents', eventWithUser);
             dispatch({ type: ADD_EVENT, payload: response.data });
         } catch (err) {
+            addNotification({ message: 'Erreur lors de l\'ajout de l\'événement.', type: 'error' });
             dispatch({ type: SET_ERROR, payload: err.message });
         }
     };
+
 
 
     const deleteEvent = async (eventId) => {

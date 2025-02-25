@@ -20,6 +20,7 @@ function App() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [notification, setNotification] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false); // Ajout de l'état pour la connexion de l'utilisateur
+    const [ws, setWs] = useState(null);
 
     // Accès à l'état global du store
     const { state, fetchEvents, addEvent, deleteEvent, updateEvent } = useEventStore();
@@ -46,49 +47,60 @@ function App() {
 
     // Écoute de la connexion WebSocket pour les notifications
     useEffect(() => {
-        if (!isLoggedIn) return; // Si l'utilisateur n'est pas connecté, ne pas écouter les notifications
+        if (!isLoggedIn) return; // Ne pas établir la connexion si l'utilisateur n'est pas connecté
 
-        const ws = new WebSocket('ws://localhost:8080');
+        const token = localStorage.getItem('auth_token');
+        if (!token) {
+            console.warn("Aucun token trouvé, connexion WebSocket annulée.");
+            return;
+        }
 
-        ws.onopen = () => {
-            console.log('Connexion WebSocket établie');
-            ws.send(JSON.stringify({ action: 'ping' }));
+        const socket = new WebSocket(`ws://localhost:8080?token=${token}`);
+        setWs(socket);
+
+        socket.onopen = () => {
+            console.log("Connexion WebSocket établie");
+            socket.send(JSON.stringify({ action: 'ping' }));
         };
 
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            console.log('data', data);
+        socket.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                console.log("Message WebSocket reçu :", data);
 
-            // Assurer qu'un message contient une notification
-            if (data.message) {
-                setNotification({ message: data.message, type: data.type || 'info' });
-                setTimeout(() => setNotification(null), 8000);
-                const audio = new Audio('/assets/notif_sound.wav');
-                audio.play().catch(error => console.error("Erreur lecture audio :", error));
-            }
+                if (data.message) {
+                    setNotification({ message: data.message, type: data.type || 'info' });
+                    setTimeout(() => setNotification(null), 8000);
 
-            if (Notification.permission === "granted" && data.message) {
-                const notification = new Notification("Nouvelle notification", {
-                    body: data.message || "Nouvelle notification !",
-                });
+                    // Jouer un son de notification
+                    const audio = new Audio('/assets/notif_sound.wav');
+                    audio.play().catch(error => console.error("Erreur lecture audio :", error));
 
-                const audio = new Audio('/assets/notif_sound.wav');
-                audio.play().catch(error => console.error("Erreur lecture audio :", error));
+                    // Envoyer une notification native si autorisée
+                    if (Notification.permission === "granted") {
+                        const notif = new Notification("Nouvelle notification", {
+                            body: data.message,
+                        });
 
-                notification.onclick = () => {
-                    window.focus();
-                    window.location.href = "http://localhost:5173/";
-                };
+                        notif.onclick = () => {
+                            window.focus();
+                            window.location.href = "http://localhost:5173/";
+                        };
+                    }
+                }
+            } catch (error) {
+                console.error("Erreur lors de la lecture du message WebSocket :", error);
             }
         };
 
-        ws.onerror = (error) => {
-            console.error('Erreur WebSocket:', error);
+        socket.onerror = (error) => {
+            console.error("Erreur WebSocket :", error);
         };
 
         // Fermer la connexion WebSocket lorsque le composant est démonté
         return () => {
-            ws.close();
+            console.log("Fermeture de la connexion WebSocket");
+            socket.close();
         };
     }, [isLoggedIn]); // Refaire l'écoute lorsque l'état de connexion change
 

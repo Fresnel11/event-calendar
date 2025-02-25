@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { CalendarDays, Calendar, CalendarCheck, Briefcase } from "lucide-react";
+import { CalendarDays, Calendar, CalendarCheck, Briefcase, Bell, CheckCircle, XCircle, Info,MessageCircleQuestion } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
-
+import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { div } from "framer-motion/client";
 
 const NavBar = ({ setView }) => {
     const [selectedView, setSelectedView] = useState("days");
@@ -11,8 +11,11 @@ const NavBar = ({ setView }) => {
     const [userInitial, setUserInitial] = useState(null);
     const [userEmail, setUserEmail] = useState(null);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
-    const [open, setOpen] = useState(true)
+    const [open, setOpen] = useState(true);
     const navigate = useNavigate();
+    const [notifications, setNotifications] = useState([]);
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [ws, setWs] = useState(null);
 
     useEffect(() => {
         // Vérifie si l'utilisateur est connecté
@@ -36,6 +39,29 @@ const NavBar = ({ setView }) => {
             setSelectedView(savedView);
             setView(savedView);
         }
+
+        if (!token) {
+            console.warn("Aucun token trouvé, connexion WebSocket annulée.");
+            return;
+        }
+
+        // Connexion WebSocket pour les notifications en temps réel
+        const socket = new WebSocket(`ws://localhost:8080?token=${token}`);
+        setWs(socket);
+
+        socket.onopen = () => {
+            console.log("Connexion WebSocket établie");
+            socket.send(JSON.stringify({ action: 'ping' }));
+        };
+        socket.onmessage = (event) => {
+            const notification = JSON.parse(event.data);
+            console.log("Nouvelle notification reçue:", notification);
+            setNotifications((prevNotifications) => [...prevNotifications, notification]);
+        };
+
+        return () => {
+            socket.close(); // Ferme la connexion WebSocket à la fermeture du composant
+        };
     }, [setView]);
 
     const handleSetView = (view) => {
@@ -50,6 +76,12 @@ const NavBar = ({ setView }) => {
         navigate("/login"); // Redirection vers la page de connexion
         setShowLogoutModal(false);
     };
+
+    const markNotificationsAsRead = (id) => {
+        setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
+    };
+
+    const unreadCount = notifications.filter(n => !n.read).length;
 
     const navItems = [
         { id: "days", label: "Jour", icon: <CalendarDays className="w-5 h-5" /> },
@@ -73,9 +105,85 @@ const NavBar = ({ setView }) => {
                     </button>
                 ))}
             </div>
+
             <div className="flex items-center space-x-4">
                 {isAuthenticated ? (
                     <>
+                        <div className="relative cursor-pointer" onClick={() => { setShowNotifications(!showNotifications); markNotificationsAsRead(); }}>
+                            <Bell className="w-6 h-6 text-gray-600 hover:text-[#238781]" />
+                            {unreadCount > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                                    {unreadCount}
+                                </span>
+                            )}
+                        </div>
+
+                        {/* Liste des notifications */}
+{showNotifications && (
+    <div className="absolute top-12 right-16 w-80 bg-white shadow-xl rounded-lg p-4 z-50 border border-gray-200 overflow-hidden max-h-[400px]">
+        <h3 className="font-semibold text-lg text-gray-800 mb-4">Notifications</h3>
+        {notifications.length > 0 ? (
+            notifications.map(notification => (
+                <div
+                    key={notification.id}
+                    className={`flex items-start space-x-4 p-3 rounded-md transition duration-300 ease-in-out transform hover:bg-gray-100 ${notification.read ? 'text-gray-500' : 'text-black'}`}
+                >
+                    {/* Icône de notification */}
+                    <div className="flex-shrink-0">
+                        <span
+                            className={`w-8 h-8 rounded-full flex items-center justify-center ${notification.read ? 'bg-gray-200' : 'bg-blue-500'}`}
+                        >
+                            {notification.action === 'invite' ? (
+                                <MessageCircleQuestion className={`w-5 h-5 ${notification.read ? 'text-gray-400' : 'text-white'}`} />
+                            ) : (
+                                <MessageCircleWarning className={`w-5 h-5 ${notification.read ? 'text-gray-400' : 'text-white'}`} />
+                            )}
+                        </span>
+                    </div>
+
+                    {/* Contenu de la notification */}
+                    <div className="flex-1">
+                        {notification.action === 'invite' ? (
+                            <div>
+                                <p className="text-sm font-medium">{notification.message}</p>
+                                <div className="flex space-x-2 mt-2">
+                                    <button
+                                        title="Accepter"
+                                        onClick={() => {/* Accepter l'invitation */ }}
+                                        className="text-green-500 hover:text-green-700 cursor-pointer transition"
+                                    >
+                                        <CheckCircle className="w-5 h-5" />
+                                    </button>
+                                    <button
+                                        title="Refuser"
+                                        onClick={() => {/* Refuser l'invitation */ }}
+                                        className="text-red-500 hover:text-red-700 cursor-pointer transition"
+                                    >
+                                        <XCircle className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex items-center justify-between">
+                                <p className="text-sm">{notification.message}</p>
+                                <button
+                                    onClick={() => markNotificationsAsRead(notification.id)}
+                                    className="ml-2 text-blue-500 hover:text-blue-700 transition"
+                                >
+                                    <Info className="w-5 h-5" />
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            ))
+        ) : (
+            <p className="text-gray-500 text-sm">Aucune notification</p>
+        )}
+    </div>
+)}
+
+
                         {userInitial && (
                             <div className="relative group">
                                 {/* Avatar */}
@@ -119,7 +227,6 @@ const NavBar = ({ setView }) => {
                             transition
                             className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
                         />
-
                         <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
                             <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
                                 <DialogPanel
