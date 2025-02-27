@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
 import Icon from '@mdi/react';
 import { mdiTableLargePlus } from '@mdi/js';
+import Notification from './Notification'
 
 const EditEventModal = ({ isOpen, onClose, eventToEdit, onEditEvent }) => {
     const [title, setTitle] = useState('');
@@ -14,6 +15,7 @@ const EditEventModal = ({ isOpen, onClose, eventToEdit, onEditEvent }) => {
     const [recurrence, setRecurrence] = useState('none');
     const [location, setLocation] = useState('');
     const [description, setDescription] = useState('');
+    const [notification, setNotification] = useState(null);
     const [reminder, setReminder] = useState('none');
 
     // Mettre à jour les valeurs du formulaire quand l'événement est ouvert pour modification
@@ -61,6 +63,38 @@ const EditEventModal = ({ isOpen, onClose, eventToEdit, onEditEvent }) => {
     };
 
     const handleEditEvent = () => {
+        // Validation des horaires si nécessaire
+        if (!allDay && (!startTime || !endTime)) {
+            setNotification({
+                message: "Veuillez définir l'heure de début et de fin pour l'événement.",
+                type: 'error'
+            });
+            setTimeout(() => setNotification(null), 4000);
+            return;
+        }
+    
+        const startDateTime = new Date(startDate);
+        const endDateTime = new Date(endDate);
+    
+        // Si l'événement n'est pas "toute la journée", on ajoute l'heure à la comparaison
+        if (!allDay && startTime && endTime) {
+            const [startHours, startMinutes] = startTime.split(':').map(Number);
+            const [endHours, endMinutes] = endTime.split(':').map(Number);
+    
+            startDateTime.setHours(startHours, startMinutes, 0); // Ajouter les heures/minutes à la date de début
+            endDateTime.setHours(endHours, endMinutes, 0); // Ajouter les heures/minutes à la date de fin
+        }
+    
+        // Vérifier que la date/heure de fin n'est pas inférieure à la date/heure de début
+        if (endDateTime < startDateTime) {
+            setNotification({
+                message: "La date/heure de fin ne peut pas être antérieure à la date/heure de début.",
+                type: 'error'
+            });
+            setTimeout(() => setNotification(null), 4000);
+            return;
+        }
+    
         const updatedEvent = {
             ...eventToEdit, // On garde les propriétés de l'événement original
             title: title || undefined, // Utiliser undefined si vide
@@ -74,13 +108,21 @@ const EditEventModal = ({ isOpen, onClose, eventToEdit, onEditEvent }) => {
             description: description || undefined,
             reminder: reminder || 'none',
         };
+        
         onEditEvent(updatedEvent);
         onClose();
     };
+    
 
 
     return (
         <AnimatePresence>
+            {/* Notification */}
+            {notification && (
+                <div className="fixed bottom-4 right-4 z-99">
+                    <Notification key={notification.message} message={notification.message} type={notification.type} />
+                </div>
+            )}
             {isOpen && (
                 <motion.div
                     initial={{ opacity: 0 }}

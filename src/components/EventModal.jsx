@@ -63,13 +63,32 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
             return;
         }
 
+        // Convertir les dates et heures en objets Date pour la comparaison
+        const startDateTime = new Date(startDate);
+        const endDateTime = new Date(endDate);
+
+        if (!allDay) {
+            const [startHours, startMinutes] = startTime.split(':').map(Number);
+            const [endHours, endMinutes] = endTime.split(':').map(Number);
+
+            startDateTime.setHours(startHours, startMinutes);
+            endDateTime.setHours(endHours, endMinutes);
+        }
+
+        // Vérifier que la date/heure de fin n'est pas inférieure à la date/heure de début
+        if (endDateTime < startDateTime) {
+            setNotification({ message: "La date/heure de fin ne peut pas être antérieure à la date/heure de début.", type: 'error' });
+            setTimeout(() => setNotification(null), 4000);
+            return;
+        }
+
         // Création de l'objet événement
         const event = {
             title,
-            startDate,
-            endDate,
-            startTime,
-            endTime,
+            startDate: startDateTime,
+            endDate: endDateTime,
+            startTime: allDay ? null : startTime,
+            endTime: allDay ? null : endTime,
             allDay,
             recurrence,
             location,
@@ -81,8 +100,6 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
         onAddEvent(event);
         onClose();
     };
-
-
 
     return (
         <AnimatePresence>
@@ -299,6 +316,7 @@ const EventModal = ({ isOpen, onClose, selectedDate, onAddEvent }) => {
         </AnimatePresence>
     );
 };
+
 EventModal.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,

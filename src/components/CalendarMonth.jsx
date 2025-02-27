@@ -36,7 +36,7 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent, events, setE
     const goToToday = () => {
         const today = new Date();
         setSelectedDate(today);
-        setCurrentMonth(new Date(today.getFullYear(), today.getMonth(), 1)); 
+        setCurrentMonth(new Date(today.getFullYear(), today.getMonth(), 1));
     };
 
 
@@ -98,10 +98,26 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent, events, setE
         setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
     };
 
+    // const handleDayClick = (date) => {
+    //     setSelectedDate(date);
+    //     setIsSidebarOpen(true);
+    // };
+
     const handleDayClick = (date) => {
         setSelectedDate(date);
+
+        // Vérifier s'il y a des événements sur cette journée
+        const relatedEvents = events.filter(event => {
+            const eventStart = new Date(event.startDate);
+            const eventEnd = new Date(event.endDate);
+            const normalizedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+            return normalizedDate >= new Date(eventStart.getFullYear(), eventStart.getMonth(), eventStart.getDate()) &&
+                normalizedDate <= new Date(eventEnd.getFullYear(), eventEnd.getMonth(), eventEnd.getDate());
+        });
         setIsSidebarOpen(true);
     };
+
 
     const handleDayDoubleClick = (date) => {
         setSelectedDate(date);

@@ -18,13 +18,24 @@ const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEv
     const [eventToEdit, setEventToEdit] = useState(null);
 
     useEffect(() => {
-        if (selectedDate) {
-            const filteredEvents = events.filter(event =>
-                new Date(event.startDate).toDateString() === selectedDate.toDateString()
-            );
-            setEventList(filteredEvents);
+        // Chercher un événement lié à la date sélectionnée
+        const relatedEvents = events.filter(event => {
+            const eventStart = new Date(event.startDate);
+            const eventEnd = new Date(event.endDate);
+            const normalizedSelectedDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+    
+            return normalizedSelectedDate >= new Date(eventStart.getFullYear(), eventStart.getMonth(), eventStart.getDate()) &&
+                normalizedSelectedDate <= new Date(eventEnd.getFullYear(), eventEnd.getMonth(), eventEnd.getDate());
+        });
+    
+        // Si des événements sont trouvés, les passer à l'état
+        if (relatedEvents.length > 0) {
+            setEventList(relatedEvents); // Mise à jour de l'état avec les événements trouvés
+        } else {
+            setEventList([]); // Pas d'événements pour cette date
         }
     }, [selectedDate, events]);
+    
 
     const formatTime = (time) => {
         if (!time) return '';
@@ -82,7 +93,7 @@ const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEv
     // Fonction pour ouvrir le modal de modification
     const handleEditClick = (event) => {
         setEventToEdit(event);
-        setShowEditModal(true); 
+        setShowEditModal(true);
         console.log('edit', event);
         console.log(showEditModal)
     };
@@ -132,7 +143,7 @@ const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEv
                                     </h3>
                                     <div className="flex space-x-1">
                                         <button
-                                            onClick={() => handleEditClick(event)} 
+                                            onClick={() => handleEditClick(event)}
                                             className="p-1 hover:bg-blue-200 cursor-pointer rounded-full transition-colors"
                                         >
                                             <Icon path={mdiPencil} size={0.8} className="text-gray-600" />
@@ -170,7 +181,7 @@ const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEv
                 </div>
             )}
 
-            {showDeleteModal  && (
+            {showDeleteModal && (
                 <Dialog open={open} onClose={setOpen} className="relative z-10">
                     <DialogBackdrop
                         transition
@@ -190,12 +201,12 @@ const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEv
                                         </div>
                                         <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                                             <DialogTitle as="h3" className="text-base font-semibold text-gray-900">
-                                            Confirmer la suppression
+                                                Confirmer la suppression
                                             </DialogTitle>
                                             <div className="mt-2">
                                                 <p className="text-sm text-gray-500">
-                                                Êtes-vous sûr de vouloir supprimer cet événement ?
-                                                Cette action est irréversible !
+                                                    Êtes-vous sûr de vouloir supprimer cet événement ?
+                                                    Cette action est irréversible !
                                                 </p>
                                             </div>
                                         </div>
@@ -206,7 +217,7 @@ const SidebarEvent = ({ selectedDate, onClose, events, onDeleteEvent, onUpdateEv
                                         type="button"
                                         onClick={confirmDelete}
                                         className="inline-flex cursor-pointer w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-red-500 sm:ml-3 sm:w-auto"
-                                        >
+                                    >
                                         Supprimer
                                     </button>
                                     <button
