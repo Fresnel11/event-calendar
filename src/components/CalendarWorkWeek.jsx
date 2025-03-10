@@ -7,6 +7,7 @@ import Notification from './Notification';
 import { useEventStore } from '../context/EventStore';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
+import Tooltip from '@mui/material/Tooltip';
 
 
 const CalendarWorkWeek = ({ events, setEvents, onEditEvent, onAddEvent, onDeleteEvent }) => {
@@ -267,6 +268,7 @@ const CalendarWorkWeek = ({ events, setEvents, onEditEvent, onAddEvent, onDelete
                             {`${workWeekDays[0].toLocaleDateString('fr-FR', { month: 'long', day: 'numeric' })} - ${workWeekDays[4].toLocaleDateString('fr-FR', { month: 'long', day: 'numeric', year: 'numeric' })}`}
                         </h2>
                         <div className="flex items-center justify-center translate-x-320 relative group">
+                        <Tooltip title="Aujourd'hui" arrow>
                             <Icon
                                 onClick={goToToday}
                                 path={mdiCalendarToday}
@@ -274,10 +276,7 @@ const CalendarWorkWeek = ({ events, setEvents, onEditEvent, onAddEvent, onDelete
                                 color={'#238781'}
                                 className="cursor-pointer hover:text-gray-800 transition-colors"
                             />
-                            {/* Tooltip qui apparaît au survol */}
-                            <div className="absolute hidden group-hover:block text-white bg-gray-700 text-xs rounded-lg py-1 px-2 bottom-full mb-2">
-                                Aujourd'hui
-                            </div>
+                        </Tooltip>
                         </div>
                     </div>
                 </div>

@@ -6,6 +6,7 @@ import Notification from './Notification';
 import Icon from '@mdi/react';
 import { mdiArrowLeftDropCircle, mdiArrowRightDropCircle, mdiCalendarToday } from '@mdi/js';
 import { useEventStore } from '../context/EventStore';
+import Tooltip from '@mui/material/Tooltip';
 
 
 const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent, events, setEvents, onDeleteEvent }) => {
@@ -36,7 +37,7 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent, events, setE
     const goToToday = () => {
         const today = new Date();
         setSelectedDate(today);
-        setCurrentMonth(new Date(today.getFullYear(), today.getMonth(), 1)); 
+        setCurrentMonth(new Date(today.getFullYear(), today.getMonth(), 1));
     };
 
 
@@ -98,10 +99,26 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent, events, setE
         setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
     };
 
+    // const handleDayClick = (date) => {
+    //     setSelectedDate(date);
+    //     setIsSidebarOpen(true);
+    // };
+
     const handleDayClick = (date) => {
         setSelectedDate(date);
+
+        // Vérifier s'il y a des événements sur cette journée
+        const relatedEvents = events.filter(event => {
+            const eventStart = new Date(event.startDate);
+            const eventEnd = new Date(event.endDate);
+            const normalizedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+            return normalizedDate >= new Date(eventStart.getFullYear(), eventStart.getMonth(), eventStart.getDate()) &&
+                normalizedDate <= new Date(eventEnd.getFullYear(), eventEnd.getMonth(), eventEnd.getDate());
+        });
         setIsSidebarOpen(true);
     };
+
 
     const handleDayDoubleClick = (date) => {
         setSelectedDate(date);
@@ -140,6 +157,7 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent, events, setE
                         </h2>
                     </div>
                     <div className="flex items-center justify-center space-x-4 relative group">
+                        <Tooltip title="Aujourd'hui" arrow>
                         <Icon
                             onClick={goToToday}
                             path={mdiCalendarToday}
@@ -147,11 +165,7 @@ const CalendarMonth = ({ currentMonth, setCurrentMonth, onAddEvent, events, setE
                             color={'#238781'}
                             className="cursor-pointer hover:text-gray-800 transition-colors"
                         />
-
-                        {/* Tooltip qui apparaît au survol */}
-                        <div className="absolute hidden group-hover:block text-white bg-gray-700 text-xs rounded-lg py-1 px-2 bottom-full mb-2">
-                            Aujourd'hui
-                        </div>
+                        </Tooltip>
                     </div>
                 </div>
 

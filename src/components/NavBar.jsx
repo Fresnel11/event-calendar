@@ -7,7 +7,16 @@ import axios from 'axios';
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import Notification from "./Notification";
-
+import Badge from '@mui/material/Badge';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import Avatar from '@mui/material/Avatar';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import { deepOrange } from '@mui/material/colors';
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import LogoutIcon from "@mui/icons-material/Logout";
 const NavBar = ({ setView }) => {
     const [selectedView, setSelectedView] = useState("days");
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -21,6 +30,17 @@ const NavBar = ({ setView }) => {
     const { deleteNotifications, setDeleteNotifications } = useState(null)
     const [ws, setWs] = useState(null);
     const [openMenuId, setOpenMenuId] = useState(null); // État pour gérer le menu ouvert
+    const [anchorEl, setAnchorEl] = useState(null);
+    const openMenu = Boolean(anchorEl);
+
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
 
     useEffect(() => {
         // Vérifie si l'utilisateur est connecté
@@ -68,6 +88,10 @@ const NavBar = ({ setView }) => {
             socket.close(); // Ferme la connexion WebSocket à la fermeture du composant
         };
     }, [setView]);
+
+    useEffect(() => {
+        console.log("Notifications mises à jour:", notifications);
+    }, [notifications]);
 
     const handleSetView = (view) => {
         setSelectedView(view);
@@ -134,12 +158,11 @@ const NavBar = ({ setView }) => {
             });
             // Supprimer la notification de la liste
             setNotifications(notifications.filter(n => n._id !== id));
-            setDeleteNotifications({ message: 'Notification supprimé avec succès!', type: 'success' });
-            setTimeout(() => setDeleteNotifications(null), 4000);
         } catch (error) {
             console.error("Erreur lors de la suppression de la notification:", error);
         }
     };
+
 
 
     const unreadCount = notifications.filter(n => !n.read).length;
@@ -203,12 +226,9 @@ const NavBar = ({ setView }) => {
                     {isAuthenticated ? (
                         <>
                             <div className="relative cursor-pointer" onClick={() => { setShowNotifications(!showNotifications); markAllNotificationsAsRead(); }}>
-                                <Bell className="w-6 h-6 text-gray-600 hover:text-[#238781]" />
-                                {unreadCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                                        {unreadCount}
-                                    </span>
-                                )}
+                                <Badge badgeContent={unreadCount} color="error">
+                                    <Bell className="w-6 h-6 text-gray-600 hover:text-[#238781]" />
+                                </Badge>
                             </div>
                             {showNotifications && (
                                 <div className="absolute top-12 right-16 w-96 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50">
@@ -246,8 +266,7 @@ const NavBar = ({ setView }) => {
                                                 {notifications.map(notification => (
                                                     <div
                                                         key={notification.id}
-                                                        className={`relative p-6 hover:bg-gray-50 transition-colors ${!notification.read ? 'bg-blue-50/30' : ''
-                                                            }`}
+                                                        className={`relative p-6 hover:bg-gray-50 transition-colors ${!notification.read ? 'bg-blue-50/30' : ''}`}
                                                     >
                                                         <div className="flex gap-4">
                                                             {/* Indicateur de non-lu */}
@@ -256,15 +275,8 @@ const NavBar = ({ setView }) => {
                                                             )}
                                                             {/* Icône */}
                                                             <div className="flex-shrink-0">
-                                                                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${notification.action === 'invite'
-                                                                    ? 'bg-[#238781]/10 text-[#238781]'
-                                                                    : 'bg-blue-100 text-blue-500'
-                                                                    }`}>
-                                                                    {notification.type === 'invite' ? (
-                                                                        <MessageCircleQuestion className="w-5 h-5" />
-                                                                    ) : (
-                                                                        <MessageCircleWarning className="w-5 h-5" />
-                                                                    )}
+                                                                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-blue-100 text-blue-500">
+                                                                    <MessageCircleWarning className="w-5 h-5" />
                                                                 </div>
                                                             </div>
                                                             {/* Contenu */}
@@ -272,17 +284,6 @@ const NavBar = ({ setView }) => {
                                                                 <p className={`text-sm ${!notification.read ? 'font-medium text-gray-900' : 'text-gray-600'}`}>
                                                                     {notification.message}
                                                                 </p>
-                                                                {/* Actions pour les invitations */}
-                                                                {notification.type === 'invite' && (
-                                                                    <div className="flex gap-2 mt-3">
-                                                                        <button className="px-4 py-2 text-sm font-medium cursor-pointer text-white bg-[#238781] rounded-lg hover:bg-[#1a6661] transition-colors">
-                                                                            Accepter
-                                                                        </button>
-                                                                        <button className="px-4 py-2 text-sm font-medium cursor-pointer text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
-                                                                            Refuser
-                                                                        </button>
-                                                                    </div>
-                                                                )}
                                                                 {/* Timestamp */}
                                                                 <p className="mt-1 text-xs text-gray-500">
                                                                     {formatNotificationDate(notification.createdAt)}
@@ -335,6 +336,7 @@ const NavBar = ({ setView }) => {
                                             </div>
                                         )}
                                     </div>
+
                                     {/* Footer */}
                                     {notifications.length > 0 && (
                                         <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
@@ -349,23 +351,49 @@ const NavBar = ({ setView }) => {
                                 </div>
                             )}
                             {userInitial && (
-                                <div className="relative group">
-                                    {/* Avatar */}
-                                    <div className="w-10 h-10 flex items-center justify-center bg-gray-200 text-gray-700 font-bold rounded-full cursor-pointer">
-                                        {userInitial}
-                                    </div>
-                                    {/* Tooltip visible au survol (positionné en bas) */}
-                                    <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 hidden group-hover:flex bg-gray-800 text-white text-xs px-3 py-1 rounded-md shadow-lg">
-                                        {userEmail}
-                                    </div>
+                                <div>
+                                    <Tooltip title={userEmail} arrow>
+                                        <IconButton onClick={handleClick}>
+                                            <Avatar sx={{ bgcolor: deepOrange[500] }}>
+                                                {userInitial}
+                                            </Avatar>
+                                        </IconButton>
+                                    </Tooltip>
+                                    <Menu
+                                        anchorEl={anchorEl}
+                                        open={openMenu}
+                                        onClose={handleClose}
+                                        anchorOrigin={{
+                                            vertical: "bottom",
+                                            horizontal: "right",
+                                        }}
+                                        transformOrigin={{
+                                            vertical: "top",
+                                            horizontal: "right",
+                                        }}
+                                    >
+                                        <MenuItem onClick={handleClose}>
+                                            <ListItemIcon>
+                                                <AccountCircleIcon fontSize="small" />
+                                            </ListItemIcon>
+                                            Profil
+                                        </MenuItem>
+                                        <MenuItem
+                                            onClick={() => {
+                                                handleClose();
+                                                setShowLogoutModal(true);
+                                            }}
+                                            style={{ color: "red" }}
+                                        >
+                                            <ListItemIcon>
+                                                <LogoutIcon fontSize="small" style={{ color: "red" }} />
+                                            </ListItemIcon>
+                                            Déconnexion
+                                        </MenuItem>
+                                    </Menu>
                                 </div>
                             )}
-                            <button
-                                onClick={() => setShowLogoutModal(true)}
-                                className="text-gray-600 cursor-pointer hover:text-[#238781] font-medium transition-colors duration-300"
-                            >
-                                Déconnexion
-                            </button>
+
                         </>
                     ) : (
                         <>

@@ -7,6 +7,7 @@ import Notification from './Notification';
 import { useEventStore } from '../context/EventStore';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
+import Tooltip from '@mui/material/Tooltip';
 
 
 const CalendarDays = ({ events, onAddEvent, onEditEvent, onDeleteEvent, setEvents }) => {
@@ -277,6 +278,7 @@ const CalendarDays = ({ events, onAddEvent, onEditEvent, onDeleteEvent, setEvent
 
                     {/* Icône "Aujourd'hui" avec Tooltip */}
                     <div className="flex items-center justify-center space-x-4 relative group">
+                    <Tooltip title="Aujourd'hui" arrow>
                         <Icon
                             onClick={goToToday}
                             path={mdiCalendarToday}
@@ -284,11 +286,12 @@ const CalendarDays = ({ events, onAddEvent, onEditEvent, onDeleteEvent, setEvent
                             color={'#238781'}
                             className="cursor-pointer hover:text-gray-800 transition-colors"
                         />
+                    </Tooltip>
 
-                        {/* Tooltip qui apparaît au survol */}
+                        {/* Tooltip qui apparaît au survol
                         <div className="absolute hidden group-hover:block text-white bg-gray-700 text-xs rounded-lg py-1 px-2 bottom-full mb-2">
                             Aujourd'hui
-                        </div>
+                        </div> */}
                     </div>
 
                     {/* Section du jour et de la date */}

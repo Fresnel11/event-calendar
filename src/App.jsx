@@ -13,6 +13,7 @@ import Register from './components/Register';
 import Icon from '@mdi/react';
 import { mdiPlus } from '@mdi/js';
 
+
 function App() {
     const [view, setView] = useState('month'); // 'month', 'week', 'workweek', 'day'
     const [currentDate, setCurrentDate] = useState(new Date());
