@@ -108,30 +108,7 @@ function App() {
         return outputArray;
     }
 
-    useEffect(() => {
-        const subscribeUserToPush = async () => {
-            const swRegistration = await navigator.serviceWorker.ready;
-
-            // S'abonner aux notifications Push
-            const subscription = await swRegistration.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(process.env.REACT_APP_VAPID_PUBLIC_KEY)
-            });
-
-            console.log('Utilisateur abonné aux notifications push:', subscription);
-
-            // Envoi de la souscription au serveur
-            fetch('/api/save-subscription', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(subscription),
-            });
-        };
-
-        if ('Notification' in window && 'serviceWorker' in navigator) {
-            subscribeUserToPush();
-        }
-    }, []);
+   
 
 
 
