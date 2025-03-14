@@ -1,22 +1,47 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, UserPen } from 'lucide-react';
 import Notification from './Notification';
 import { useNavigate } from 'react-router-dom';
 
 const Register = ({ onSuccess }) => {
     const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [errors, setErrors] = useState({});
     const [notification, setNotification] = useState(null);
     const navigate = useNavigate();
 
+    const validateForm = () => {
+        const newErrors = {};
+
+        if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+            newErrors.email = "L'email n'est pas valide.";
+        }
+
+        if (!username.match(/^[a-zA-Z0-9_]{3,15}$/)) {
+            newErrors.username = 'Le nom d\'utilisateur doit contenir entre 3 et 15 caractères alphanumériques.';
+        }
+
+        if (password.length < 8 && password.match(/^(?=.*[A-Z])(?=.*\d).{8,}$/)) {
+            newErrors.password = 'Le mot de passe doit contenir au moins 8 caractères, une majuscule et un chiffre.';
+        }
+
+        if (password !== confirmPassword) {
+            newErrors.confirmPassword = 'Les mots de passe ne correspondent pas.';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!validateForm()) return;
 
         if (password !== confirmPassword) {
             setError("Les mots de passe ne correspondent pas.");
@@ -28,14 +53,12 @@ const Register = ({ onSuccess }) => {
             const response = await fetch('http://localhost:5000/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({ email, username, password }),
             });
 
-            if (!response.ok) {
-                throw new Error(`Erreur HTTP: ${response.status}`);
-            }
-
             const data = await response.json();
+            if (!response.ok) throw new Error(data.message || `Erreur HTTP: ${response.status}`);
+
             console.log('Données JSON de l\'API :', data); // Vérifie les données JSON
 
             if (data.success) {
@@ -54,13 +77,15 @@ const Register = ({ onSuccess }) => {
             console.error('Erreur attrapée :', error); // Affiche l'erreur dans la console
             setError('Une erreur est survenue lors de l\'inscription.');
             console.log('error :dsdf');
-            setNotification({ message:'Une erreur est survenue lors de l\'inscription.', type: 'error' });
+            setNotification({ message: 'Une erreur est survenue lors de l\'inscription.', type: 'error' });
             setTimeout(() => setNotification(null), 4000);
 
         } finally {
             setIsLoading(false);
         }
     };
+
+
 
     return (
         <div>
@@ -86,15 +111,15 @@ const Register = ({ onSuccess }) => {
                         <p className="mt-2 text-sm text-gray-600">Inscrivez-vous</p>
                     </div>
                     <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-                        {/* {error && (
+                        {error.api && (
                             <motion.div
                                 initial={{ opacity: 0, y: -10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 className="bg-red-50 text-red-600 p-4 rounded-lg text-sm"
                             >
-                                {error}
+                                {error.api}
                             </motion.div>
-                        )} */}
+                        )}
                         <div className="space-y-4">
                             <div>
                                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -110,6 +135,23 @@ const Register = ({ onSuccess }) => {
                                         onChange={(e) => setEmail(e.target.value)}
                                         className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#238781] focus:border-transparent bg-white text-gray-900 placeholder-gray-500 transition-all duration-200"
                                         placeholder="votreemail@exemple.com"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+                                    Username
+                                </label>
+                                <div className="relative">
+                                    <UserPen className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    <input
+                                        id="username"
+                                        type="username"
+                                        required
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                        className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#238781] focus:border-transparent bg-white text-gray-900 placeholder-gray-500 transition-all duration-200"
+                                        placeholder="Votre nom d'utilisateur"
                                     />
                                 </div>
                             </div>
